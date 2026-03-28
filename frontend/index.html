@@ -85,6 +85,11 @@
     .drop-zone { aspect-ratio: auto; max-height: 40vh; min-height: 200px; }
     .drop-zone img#preview { position: relative; inset: auto; max-height: 40vh; object-fit: contain; }
     .state-empty { display: none !important; }
+    .has-result .upload-panel { display: none; }
+    .has-result .result-cover-row { display: flex; }
+    .has-result .btn-scan-another { display: block; }
+    .has-result .result-body > .book-title,
+    .has-result .result-body > .book-author { display: none; }
   }
 
   /* Left panel — upload */
@@ -278,6 +283,42 @@
     animation: slideUp 0.4s ease forwards;
   }
 
+  .result-cover-row {
+    display: none;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .result-cover-row img {
+    width: 80px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .result-cover-info { flex: 1; min-width: 0; }
+
+  .btn-scan-another {
+    display: none;
+    width: 100%;
+    padding: 0.65rem 1rem;
+    margin-top: 1rem;
+    border-radius: 3px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--ink);
+    transition: all 0.15s;
+  }
+
+  .btn-scan-another:hover { background: var(--paper); }
+
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
@@ -454,6 +495,13 @@
         <span class="confidence-badge" id="confidenceBadge">HIGH MATCH</span>
       </div>
       <div class="result-body">
+        <div class="result-cover-row" id="resultCoverRow">
+          <img id="resultThumbnail" src="" alt="Book cover">
+          <div class="result-cover-info">
+            <div class="book-title" id="bookTitleMobile">—</div>
+            <div class="book-author" id="bookAuthorMobile">—</div>
+          </div>
+        </div>
         <div class="book-title" id="bookTitle">—</div>
         <div class="book-author" id="bookAuthor">—</div>
         <hr class="divider-line">
@@ -483,6 +531,7 @@
           View on Google Books
           <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         </a>
+        <button class="btn-scan-another" id="scanAnotherBtn">Scan another book</button>
       </div>
     </div>
 
@@ -523,14 +572,20 @@ fileInput.addEventListener('change', () => {
   if (fileInput.files[0]) loadFile(fileInput.files[0]);
 });
 
-clearBtn.addEventListener('click', () => {
+const scanAnotherBtn = document.getElementById('scanAnotherBtn');
+
+function resetToUpload() {
   preview.src = ''; preview.classList.remove('visible');
   dropIcon.style.display = ''; dropText.style.display = '';
   scanBtn.disabled = true;
   currentImageBase64 = null;
   fileInput.value = '';
+  document.querySelector('main').classList.remove('has-result');
   showState('empty');
-});
+}
+
+clearBtn.addEventListener('click', resetToUpload);
+scanAnotherBtn.addEventListener('click', resetToUpload);
 
 function loadFile(file) {
   const reader = new FileReader();
@@ -590,8 +645,13 @@ scanBtn.addEventListener('click', async () => {
     if (data.error) throw new Error(data.error);
 
     // Fill result
-    document.getElementById('bookTitle').textContent = data.title || 'Unknown title';
-    document.getElementById('bookAuthor').textContent = data.author ? 'by ' + data.author : '';
+    const titleText = data.title || 'Unknown title';
+    const authorText = data.author ? 'by ' + data.author : '';
+    document.getElementById('bookTitle').textContent = titleText;
+    document.getElementById('bookAuthor').textContent = authorText;
+    document.getElementById('bookTitleMobile').textContent = titleText;
+    document.getElementById('bookAuthorMobile').textContent = authorText;
+    document.getElementById('resultThumbnail').src = preview.src;
     document.getElementById('bookPublisher').textContent = data.publisher || '—';
     document.getElementById('bookDate').textContent = data.publishedDate ? data.publishedDate.slice(0,4) : '—';
     document.getElementById('bookPages').textContent = data.pageCount ? data.pageCount + ' pp.' : '—';
@@ -604,7 +664,10 @@ scanBtn.addEventListener('click', async () => {
     else link.style.display = 'none';
 
     document.getElementById('step4').classList.add('active');
-    setTimeout(() => showState('result'), 400);
+    setTimeout(() => {
+      showState('result');
+      document.querySelector('main').classList.add('has-result');
+    }, 400);
 
   } catch (err) {
     stateError.textContent = 'Could not identify this book. ' + (err.message || 'Please try a clearer image.');
