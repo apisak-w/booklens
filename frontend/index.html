@@ -618,6 +618,7 @@ function resetToUpload() {
   fileInput.value = '';
   document.querySelector('main').classList.remove('has-result');
   showState('empty');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 clearBtn.addEventListener('click', resetToUpload);
