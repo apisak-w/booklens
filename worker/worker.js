@@ -97,6 +97,7 @@ export default {
         categories: volumeInfo.categories?.[0] || null,
         description: volumeInfo.description || null,
         infoLink: volumeInfo.infoLink || null,
+        thumbnail: volumeInfo.imageLinks?.thumbnail?.replace('http://', 'https://') || null,
         debug, // remove this once working
       }), { headers: cors });
 
