@@ -15,5 +15,11 @@ binding = "AI"
 [observability]
 enabled = true
 
+[observability.logs]
+invocation_logs = true
+
+[observability.traces]
+enabled = true
+
 # For local development: wrangler dev
 # To deploy: wrangler deploy
