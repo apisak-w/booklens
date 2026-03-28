@@ -10,9 +10,7 @@ BookLens is a web app that identifies books from cover photos using AI vision. U
 
 Two independently deployed components in a single repo:
 
-- **`frontend/`** — Single-page static site (`index.html`) deployed to **Cloudflare Pages** (`booklens-mom.pages.dev`). Contains all HTML/CSS/JS inline. Has two scan modes:
-  - *Demo mode*: Calls Claude API directly from the browser (requires user's API key)
-  - *Production mode*: Calls the Cloudflare Worker endpoint
+- **`frontend/`** — Single-page static site (`index.html`) deployed to **Cloudflare Pages** (`booklens-mom.pages.dev`). Contains all HTML/CSS/JS inline. Calls the Cloudflare Worker to scan book covers.
 - **`worker/`** — Cloudflare Worker (`worker.js`) deployed to **Cloudflare Workers**. Receives a base64 image via `POST /scan`, runs Llama 3.2 Vision via Workers AI binding, then fetches metadata from Google Books API.
 
 The frontend talks to the worker at `https://booklens-worker.apisak-wongkhempetch.workers.dev/scan`.
@@ -39,7 +37,7 @@ GitHub Actions handles CI/CD (`.github/workflows/`):
 - `deploy-pages.yml` — triggers on `frontend/**` changes on main
 - `deploy-worker.yml` — triggers on `worker/**` changes on main
 
-Both use `cloudflare/wrangler-action@v3` with the `CLOUDFLARE_API_TOKEN` repo secret.
+Both use `cloudflare/wrangler-action@v3` with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repo secrets.
 
 ## Commit Convention
 
