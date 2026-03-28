@@ -61,3 +61,13 @@ Examples:
 - Worker is currently in **debug mode** — responses include a `debug` object. Remove before production.
 - No build step, bundler, or package manager — both components are single files.
 - CORS is fully open (`*`) on the worker.
+
+## Sensitive Data Policy
+
+**This is a public repo.** Never hardcode personal identifiers, domains, emails, or URLs into tracked files. Use Terraform variables (with `sensitive = true`) or environment variables instead. This includes:
+- Worker/Pages domains (e.g. `*.workers.dev`, `*.pages.dev`)
+- Email addresses
+- Cloudflare account/zone IDs
+- Any value that could identify the owner
+
+History was rewritten once to scrub leaked identifiers — avoid repeating this.
