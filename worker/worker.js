@@ -58,18 +58,21 @@ export default {
         return new Response(JSON.stringify({ error: 'AI step failed', debug }), { status: 500, headers: cors });
       }
 
-      // Step 3: Parse AI response
+      // Step 3: Parse AI response (may be an object or a string)
       debug.step = '3_parse_ai';
       let title = 'Unknown', author = 'Unknown';
       try {
-        const clean = aiResponse.response.trim().replace(/```json\n?|```/g, '').trim();
-        const parsed = JSON.parse(clean);
+        const raw = aiResponse.response;
+        const parsed = typeof raw === 'string'
+          ? JSON.parse(raw.trim().replace(/```json\n?|```/g, '').trim())
+          : raw;
         title = parsed.title || title;
         author = parsed.author || author;
       } catch (parseErr) {
         debug.parseError = parseErr.message;
-        const tMatch = aiResponse.response?.match(/"title"\s*:\s*"([^"]+)"/);
-        const aMatch = aiResponse.response?.match(/"author"\s*:\s*"([^"]+)"/);
+        const rawStr = typeof aiResponse.response === 'string' ? aiResponse.response : '';
+        const tMatch = rawStr.match(/"title"\s*:\s*"([^"]+)"/);
+        const aMatch = rawStr.match(/"author"\s*:\s*"([^"]+)"/);
         if (tMatch) title = tMatch[1];
         if (aMatch) author = aMatch[1];
       }
