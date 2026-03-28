@@ -81,6 +81,8 @@
   @media (max-width: 680px) {
     main { grid-template-columns: 1fr; padding: 2rem 1.25rem; }
     header { padding: 1.5rem 1.25rem 1rem; }
+    .upload-panel { position: static; }
+    .drop-zone { aspect-ratio: 4/3; max-height: 50vh; }
   }
 
   /* Left panel — upload */
@@ -424,7 +426,7 @@
       <button class="btn btn-primary" id="scanBtn" disabled>Identify Book</button>
       <button class="btn btn-secondary" id="clearBtn">Clear</button>
     </div>
-    <input type="file" id="fileInput" accept="image/*" capture="environment">
+    <input type="file" id="fileInput" accept="image/*">
   </div>
 
   <!-- Right: Results -->
