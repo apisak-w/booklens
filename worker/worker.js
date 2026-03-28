@@ -35,12 +35,16 @@ export default {
 
       let aiResponse;
       try {
+        // Accept Llama 3.2 Vision license agreement
+        await env.AI.run('@cf/meta/llama-3.2-11b-vision-instruct', {
+          messages: [{ role: 'user', content: 'agree' }],
+          max_tokens: 1,
+        });
+
         aiResponse = await env.AI.run(
           '@cf/meta/llama-3.2-11b-vision-instruct',
           {
             messages: [
-              { role: 'user', content: 'agree' },
-              { role: 'assistant', content: 'agree' },
               {
                 role: 'user',
                 content: [
