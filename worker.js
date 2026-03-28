@@ -1,6 +1,6 @@
 /**
 
-- BookLens — Cloudflare Worker
+- BookLens — Cloudflare Workerx
 - 
 - Receives a book cover image (base64), runs Llama 3.2-Vision via
 - Cloudflare Workers AI to extract the title/author, then fetches
