@@ -10,6 +10,8 @@ binding = "AI"
 # Add your Google Books API key here (optional but recommended for higher rate limits)
 # Get one free at: https://console.cloud.google.com/apis/library/books.googleapis.com
 [vars]
+# ALLOWED_ORIGIN — set to your Pages domain to lock down CORS (e.g. https://your-app.pages.dev)
+# Store as a secret in production: wrangler secret put ALLOWED_ORIGIN
 # Key is stored as a Wrangler secret — run: wrangler secret put GOOGLE_BOOKS_API_KEY
 
 [observability]
