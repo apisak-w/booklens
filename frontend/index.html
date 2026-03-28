@@ -41,11 +41,17 @@
   }
 
   header {
-    padding: 2.5rem 3rem 1.5rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 1.25rem 3rem;
     display: flex;
     align-items: baseline;
     gap: 1rem;
     border-bottom: 1px solid var(--border);
+    background: var(--cream);
   }
 
   .logo {
@@ -71,7 +77,7 @@
   main {
     max-width: 960px;
     margin: 0 auto;
-    padding: 3rem 2rem;
+    padding: 5rem 2rem 3rem;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2.5rem;
@@ -79,14 +85,15 @@
   }
 
   @media (max-width: 680px) {
-    main { grid-template-columns: 1fr; padding: 2rem 1.25rem; }
-    header { padding: 1.5rem 1.25rem 1rem; }
+    main { grid-template-columns: 1fr; padding: 4.5rem 1.25rem 2rem; }
+    header { padding: 1rem 1.25rem; }
     .upload-panel { position: static; }
     .drop-zone { aspect-ratio: auto; max-height: 40vh; min-height: 200px; }
     .drop-zone img#preview { position: relative; inset: auto; max-height: 40vh; object-fit: contain; }
     .state-empty { display: none !important; }
     .has-result .upload-panel { display: none; }
     .has-result .result-cover-row { display: flex; }
+    .has-result .result-cover-row img { width: 70px; height: 95px; object-fit: cover; border-radius: 3px; border: 1px solid var(--border); flex-shrink: 0; }
     .has-result .btn-scan-another { display: block; }
     .has-result .result-body > .book-title,
     .has-result .result-body > .book-author { display: none; }
@@ -290,16 +297,35 @@
     margin-bottom: 1rem;
   }
 
-  .result-cover-row img {
-    width: 80px;
-    height: 110px;
-    object-fit: cover;
-    border-radius: 3px;
-    border: 1px solid var(--border);
-    flex-shrink: 0;
+  .result-cover-row .result-cover-info { flex: 1; min-width: 0; }
+
+  .cover-compare {
+    display: none;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
   }
 
-  .result-cover-info { flex: 1; min-width: 0; }
+  .cover-compare-item {
+    flex: 1;
+    text-align: center;
+  }
+
+  .cover-compare-item img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  .cover-compare-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: 0.4rem;
+  }
 
   .btn-scan-another {
     display: none;
@@ -496,7 +522,7 @@
       </div>
       <div class="result-body">
         <div class="result-cover-row" id="resultCoverRow">
-          <img id="resultThumbnail" src="" alt="Book cover">
+          <img id="resultThumbnailMobile" src="" alt="Book cover">
           <div class="result-cover-info">
             <div class="book-title" id="bookTitleMobile">—</div>
             <div class="book-author" id="bookAuthorMobile">—</div>
@@ -504,6 +530,16 @@
         </div>
         <div class="book-title" id="bookTitle">—</div>
         <div class="book-author" id="bookAuthor">—</div>
+        <div class="cover-compare" id="coverCompare">
+          <div class="cover-compare-item">
+            <img id="coverUser" src="" alt="Your photo">
+            <div class="cover-compare-label">Your photo</div>
+          </div>
+          <div class="cover-compare-item">
+            <img id="coverApi" src="" alt="Google Books cover">
+            <div class="cover-compare-label">Google Books</div>
+          </div>
+        </div>
         <hr class="divider-line">
         <div class="meta-grid">
           <div class="meta-item">
@@ -651,7 +687,17 @@ scanBtn.addEventListener('click', async () => {
     document.getElementById('bookAuthor').textContent = authorText;
     document.getElementById('bookTitleMobile').textContent = titleText;
     document.getElementById('bookAuthorMobile').textContent = authorText;
-    document.getElementById('resultThumbnail').src = preview.src;
+    document.getElementById('resultThumbnailMobile').src = data.thumbnail || preview.src;
+
+    // Cover comparison
+    document.getElementById('coverUser').src = preview.src;
+    const coverCompare = document.getElementById('coverCompare');
+    if (data.thumbnail) {
+      document.getElementById('coverApi').src = data.thumbnail;
+      coverCompare.style.display = 'flex';
+    } else {
+      coverCompare.style.display = 'none';
+    }
     document.getElementById('bookPublisher').textContent = data.publisher || '—';
     document.getElementById('bookDate').textContent = data.publishedDate ? data.publishedDate.slice(0,4) : '—';
     document.getElementById('bookPages').textContent = data.pageCount ? data.pageCount + ' pp.' : '—';
