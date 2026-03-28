@@ -61,3 +61,19 @@ Examples:
 - Worker is currently in **debug mode** — responses include a `debug` object. Remove before production.
 - No build step, bundler, or package manager — both components are single files.
 - CORS is fully open (`*`) on the worker.
+
+## Sensitive Data Policy
+
+**This is a public repo.** Never hardcode personal identifiers, domains, emails, or URLs into tracked files. Use Terraform variables (with `sensitive = true`) or environment variables instead. This includes:
+- Worker/Pages domains (e.g. `*.workers.dev`, `*.pages.dev`)
+- Email addresses
+- Cloudflare account/zone IDs
+- Any value that could identify the owner
+
+History was rewritten once to scrub leaked identifiers — avoid repeating this.
+
+## Git Workflow Rules
+
+- **Always `git pull` before starting work.** After force pushes, PR merges, or any remote changes, sync local main before creating branches or making changes. Skipping this leads to stale state, lost work, and unnecessary file recreation.
+- **Never commit sensitive data "to fix later."** Get it right in the first commit. If a value might be sensitive, use a variable from the start. Cleaning up history after the fact (force push, filter-repo) is costly and error-prone.
+- **Verify file/directory paths before writing.** Run `ls` or `file` to confirm a path is what you expect (e.g. not a binary) before creating files there.
