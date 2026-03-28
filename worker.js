@@ -19,7 +19,6 @@ const cors = {
 ‘Content-Type’: ‘application/json’,
 };
 
-```
 // Handle CORS preflight
 if (request.method === 'OPTIONS') {
   return new Response(null, { headers: cors });
@@ -133,7 +132,6 @@ try {
     { status: 500, headers: cors }
   );
 }
-```
 
 },
 };
