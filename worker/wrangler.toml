@@ -12,5 +12,8 @@ binding = "AI"
 [vars]
 # Key is stored as a Wrangler secret — run: wrangler secret put GOOGLE_BOOKS_API_KEY
 
+[observability]
+enabled = true
+
 # For local development: wrangler dev
 # To deploy: wrangler deploy
