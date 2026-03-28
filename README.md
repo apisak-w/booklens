@@ -63,7 +63,3 @@ GitHub Actions requires two repo secrets:
 - `CLOUDFLARE_API_TOKEN` — API token with Workers Scripts and Pages edit permissions
 - `CLOUDFLARE_ACCOUNT_ID` — Your Cloudflare account ID
 
-## Live
-
-- **Frontend:** [REDACTED_PAGES_DOMAIN](https://REDACTED_PAGES_DOMAIN)
-- **Worker:** `https://REDACTED_WORKER_DOMAIN/scan`
