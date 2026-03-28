@@ -398,121 +398,6 @@
     line-height: 1.6;
   }
 
-  /* Worker code section */
-  .worker-section {
-    grid-column: 1 / -1;
-    margin-top: 1rem;
-    border-top: 1px solid var(--border);
-    padding-top: 2rem;
-  }
-
-  .worker-section h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.25rem;
-    margin-bottom: 0.4rem;
-  }
-
-  .worker-section p {
-    font-size: 0.875rem;
-    color: var(--muted);
-    margin-bottom: 1.25rem;
-    line-height: 1.6;
-  }
-
-  .code-block {
-    background: var(--ink);
-    color: #E8E0D0;
-    border-radius: 4px;
-    padding: 1.5rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.78rem;
-    line-height: 1.7;
-    overflow-x: auto;
-    position: relative;
-  }
-
-  .code-block .kw { color: #C4622D; }
-  .code-block .str { color: #C9A84C; }
-  .code-block .cmt { color: #6A6050; }
-  .code-block .fn { color: #8DB88D; }
-
-  .copy-btn {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(232,224,208,0.6);
-    border-radius: 3px;
-    padding: 0.3rem 0.65rem;
-    font-size: 0.72rem;
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
-    transition: all 0.15s;
-  }
-
-  .copy-btn:hover { background: rgba(255,255,255,0.14); color: #E8E0D0; }
-
-  .deploy-steps {
-    margin-top: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .deploy-step {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    font-size: 0.875rem;
-    color: var(--ink);
-    line-height: 1.5;
-  }
-
-  .deploy-step-num {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--rust);
-    color: #fff;
-    font-size: 0.7rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .deploy-step code {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    background: var(--paper);
-    padding: 0.1rem 0.4rem;
-    border-radius: 2px;
-    color: var(--rust);
-  }
-
-  /* Tabs */
-  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
-
-  .tab {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    background: none;
-    color: var(--muted);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.15s;
-  }
-
-  .tab.active { color: var(--ink); border-bottom-color: var(--rust); }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
 </style>
 </head>
 <body>
@@ -600,117 +485,6 @@
     <div class="state-error" id="stateError"></div>
   </div>
 
-  <!-- Worker code section -->
-  <div class="worker-section">
-    <h2>Deploy to Cloudflare Workers</h2>
-    <p>This demo uses the Claude API to simulate vision. To use <strong>Cloudflare Workers AI (Llama 3.2-Vision)</strong> in production, deploy this Worker. Your frontend then calls <code style="font-family:'DM Mono',monospace;font-size:0.8rem;background:var(--paper);padding:0.1rem 0.4rem;border-radius:2px;color:var(--rust);">https://your-worker.workers.dev/scan</code> instead.</p>
-
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('worker')">worker.js</button>
-      <button class="tab" onclick="switchTab('wrangler')">wrangler.toml</button>
-    </div>
-
-    <div class="tab-content active" id="tab-worker">
-      <div class="code-block" id="workerCode">
-        <button class="copy-btn" onclick="copyCode('workerCode')">copy</button>
-<span class="cmt">// Cloudflare Worker — BookLens backend
-// Deploy: wrangler deploy</span>
-
-<span class="kw">export default</span> {
-  <span class="kw">async</span> <span class="fn">fetch</span>(request, env) {
-    <span class="kw">const</span> headers = {
-      <span class="str">'Access-Control-Allow-Origin'</span>: <span class="str">'*'</span>,
-      <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
-    };
-
-    <span class="kw">if</span> (request.method === <span class="str">'OPTIONS'</span>)
-      <span class="kw">return new</span> <span class="fn">Response</span>(<span class="kw">null</span>, { headers });
-
-    <span class="kw">if</span> (request.method !== <span class="str">'POST'</span>)
-      <span class="kw">return new</span> <span class="fn">Response</span>(<span class="str">'Method not allowed'</span>, { status: 405 });
-
-    <span class="kw">try</span> {
-      <span class="cmt">// 1. Receive image as base64 from frontend</span>
-      <span class="kw">const</span> { imageBase64 } = <span class="kw">await</span> request.json();
-
-      <span class="cmt">// 2. Run Llama 3.2-Vision on Cloudflare Workers AI</span>
-      <span class="kw">const</span> aiResponse = <span class="kw">await</span> env.AI.<span class="fn">run</span>(<span class="str">'@cf/meta/llama-3.2-11b-vision-instruct'</span>, {
-        messages: [{
-          role: <span class="str">'user'</span>,
-          content: [
-            { type: <span class="str">'text'</span>, text: <span class="str">'This is a book cover. Extract the exact book title and author name. Reply in JSON: {"title":"...","author":"..."}'</span> },
-            { type: <span class="str">'image_url'</span>, image_url: { url: <span class="str">`data:image/jpeg;base64,${imageBase64}`</span> } }
-          ]
-        }],
-        max_tokens: 150,
-      });
-
-      <span class="cmt">// 3. Parse the AI response</span>
-      <span class="kw">const</span> parsed = <span class="fn">JSON</span>.<span class="fn">parse</span>(aiResponse.response);
-      <span class="kw">const</span> { title, author } = parsed;
-
-      <span class="cmt">// 4. Lookup on Google Books API (free)</span>
-      <span class="kw">const</span> query = <span class="fn">encodeURIComponent</span>(<span class="str">`${title} ${author}`</span>);
-      <span class="kw">const</span> booksRes = <span class="kw">await</span> <span class="fn">fetch</span>(
-        <span class="str">`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1&key=${env.GOOGLE_BOOKS_API_KEY}`</span>
-      );
-      <span class="kw">const</span> booksData = <span class="kw">await</span> booksRes.<span class="fn">json</span>();
-      <span class="kw">const</span> book = booksData.items?.[0]?.volumeInfo || {};
-
-      <span class="cmt">// 5. Return merged result</span>
-      <span class="kw">return new</span> <span class="fn">Response</span>(<span class="fn">JSON</span>.<span class="fn">stringify</span>({
-        title: book.title || title,
-        author: (book.authors || [author]).<span class="fn">join</span>(<span class="str">', '</span>),
-        publisher: book.publisher,
-        publishedDate: book.publishedDate,
-        pageCount: book.pageCount,
-        categories: book.categories?.[0],
-        description: book.description,
-        infoLink: book.infoLink,
-      }), { headers });
-
-    } <span class="kw">catch</span> (err) {
-      <span class="kw">return new</span> <span class="fn">Response</span>(<span class="fn">JSON</span>.<span class="fn">stringify</span>({ error: err.message }), { status: 500, headers });
-    }
-  }
-};
-      </div>
-    </div>
-
-    <div class="tab-content" id="tab-wrangler">
-      <div class="code-block" id="wranglerCode">
-        <button class="copy-btn" onclick="copyCode('wranglerCode')">copy</button>
-name = <span class="str">"booklens-worker"</span>
-main = <span class="str">"worker.js"</span>
-compatibility_date = <span class="str">"2024-01-01"</span>
-
-[ai]
-binding = <span class="str">"AI"</span>
-
-[vars]
-GOOGLE_BOOKS_API_KEY = <span class="str">"YOUR_API_KEY_HERE"</span>
-      </div>
-    </div>
-
-    <div class="deploy-steps">
-      <div class="deploy-step">
-        <div class="deploy-step-num">1</div>
-        <div>Install Wrangler CLI: <code>npm install -g wrangler</code> then <code>wrangler login</code></div>
-      </div>
-      <div class="deploy-step">
-        <div class="deploy-step-num">2</div>
-        <div>Get a free Google Books API key from <code>console.cloud.google.com</code> and add it to <code>wrangler.toml</code></div>
-      </div>
-      <div class="deploy-step">
-        <div class="deploy-step-num">3</div>
-        <div>Deploy: <code>wrangler deploy</code> — your Worker URL will be shown. Update <code>WORKER_URL</code> in <code>index.html</code></div>
-      </div>
-      <div class="deploy-step">
-        <div class="deploy-step-num">4</div>
-        <div>Enable Workers AI in your Cloudflare dashboard (free tier: 10,000 neurons/day)</div>
-      </div>
-    </div>
-  </div>
 </main>
 
 <script>
@@ -727,7 +501,6 @@ const stateLoading = document.getElementById('stateLoading');
 const resultCard = document.getElementById('resultCard');
 const stateError = document.getElementById('stateError');
 
-// ── In production, replace with your Worker URL ──
 const WORKER_URL = 'https://booklens-worker.apisak-wongkhempetch.workers.dev/scan';
 
 let currentImageBase64 = null;
@@ -803,20 +576,12 @@ scanBtn.addEventListener('click', async () => {
   bar.style.animation = '';
 
   try {
-    let data;
-
-    if (WORKER_URL) {
-      // Production: call your Cloudflare Worker
-      const res = await fetch(WORKER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: currentImageBase64 }),
-      });
-      data = await res.json();
-    } else {
-      // Demo mode: use Claude API directly (simulates the Worker)
-      data = await scanWithClaude(currentImageBase64);
-    }
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: currentImageBase64 }),
+    });
+    const data = await res.json();
 
     if (data.error) throw new Error(data.error);
 
@@ -845,72 +610,6 @@ scanBtn.addEventListener('click', async () => {
   }
 });
 
-// Demo mode: uses the Anthropic API to simulate Cloudflare Workers AI
-async function scanWithClaude(base64) {
-  // Step 1: Vision — extract title/author
-  const visionRes = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': '', 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 200,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
-          { type: 'text', text: 'This is a book cover photo. Extract the book title and author. Reply ONLY with valid JSON: {"title":"...","author":"..."}. If unclear, make your best guess.' }
-        ]
-      }]
-    })
-  });
-
-  const visionData = await visionRes.json();
-  let title = 'Unknown', author = 'Unknown';
-  try {
-    const txt = visionData.content[0].text.trim();
-    const parsed = JSON.parse(txt);
-    title = parsed.title || title;
-    author = parsed.author || author;
-  } catch(e) {
-    const m = visionData.content?.[0]?.text?.match(/"title"\s*:\s*"([^"]+)"/);
-    if (m) title = m[1];
-    const a = visionData.content?.[0]?.text?.match(/"author"\s*:\s*"([^"]+)"/);
-    if (a) author = a[1];
-  }
-
-  // Step 2: Google Books lookup
-  const q = encodeURIComponent(`${title} ${author}`);
-  const booksRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1`);
-  const booksData = await booksRes.json();
-  const book = booksData.items?.[0]?.volumeInfo || {};
-
-  return {
-    title: book.title || title,
-    author: (book.authors || [author]).join(', '),
-    publisher: book.publisher || null,
-    publishedDate: book.publishedDate || null,
-    pageCount: book.pageCount || null,
-    categories: book.categories?.[0] || null,
-    description: book.description || null,
-    infoLink: book.infoLink || null,
-  };
-}
-
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['worker','wrangler'][i] === name));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-}
-
-function copyCode(id) {
-  const el = document.getElementById(id);
-  const text = el.innerText.replace(/^copy\n/, '');
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = el.querySelector('.copy-btn');
-    btn.textContent = 'copied!';
-    setTimeout(() => btn.textContent = 'copy', 1500);
-  });
-}
 </script>
 </body>
 </html>
