@@ -71,3 +71,9 @@ Examples:
 - Any value that could identify the owner
 
 History was rewritten once to scrub leaked identifiers — avoid repeating this.
+
+## Git Workflow Rules
+
+- **Always `git pull` before starting work.** After force pushes, PR merges, or any remote changes, sync local main before creating branches or making changes. Skipping this leads to stale state, lost work, and unnecessary file recreation.
+- **Never commit sensitive data "to fix later."** Get it right in the first commit. If a value might be sensitive, use a variable from the start. Cleaning up history after the fact (force push, filter-repo) is costly and error-prone.
+- **Verify file/directory paths before writing.** Run `ls` or `file` to confirm a path is what you expect (e.g. not a binary) before creating files there.
