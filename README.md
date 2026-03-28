@@ -15,6 +15,7 @@ BookLens identifies books from cover photos using AI vision. Upload or snap a ph
 ```
 frontend/         Static site (HTML/CSS/JS) → Cloudflare Pages
 worker/           Cloudflare Worker backend  → Cloudflare Workers
+infra/            Terraform IaC for Cloudflare resources
 .github/workflows CI/CD via GitHub Actions
 ```
 
@@ -62,6 +63,25 @@ wrangler secret put GOOGLE_BOOKS_API_KEY --config worker/wrangler.toml
 GitHub Actions requires two repo secrets:
 - `CLOUDFLARE_API_TOKEN` — API token with Workers Scripts and Pages edit permissions
 - `CLOUDFLARE_ACCOUNT_ID` — Your Cloudflare account ID
+
+## Infrastructure as Code
+
+Cloudflare resources are managed via Terraform in the `infra/` directory:
+
+```bash
+cd infra
+cp terraform.tfvars.example terraform.tfvars  # fill in your values
+terraform init
+terraform plan
+terraform apply
+```
+
+Managed resources:
+- Cloudflare Worker (`booklens-worker`) with AI binding and secrets
+- Cloudflare Pages project (`booklens`)
+- Workers.dev subdomain routing
+
+See `infra/terraform.tfvars.example` for required variables.
 
 ## Live
 

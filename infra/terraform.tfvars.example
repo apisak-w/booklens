@@ -1,0 +1,6 @@
+# Copy this to terraform.tfvars and fill in your values
+# Do NOT commit terraform.tfvars — it contains secrets
+
+cloudflare_api_token = ""
+account_id           = ""
+google_books_api_key = ""
