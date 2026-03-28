@@ -1,38 +1,58 @@
 /**
- * BookLens — Cloudflare Worker (DEBUG VERSION)
- * Paste this into the Cloudflare dashboard editor and deploy.
- * Once the bug is found, we'll switch back to the clean version.
+ * BookLens — Cloudflare Worker
  */
+
+const ALLOWED_ORIGIN = 'https://booklens-mom.pages.dev';
+const RATE_LIMIT = 10;
+const RATE_WINDOW = 60_000; // 1 minute
+
+const rateLimitMap = new Map(); // ip -> { count, resetAt }
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
+    return true;
+  }
+  entry.count++;
+  return entry.count <= RATE_LIMIT;
+}
 
 export default {
   async fetch(request, env) {
     const cors = {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Content-Type': 'application/json',
     };
 
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+
+    // Block requests not originating from the frontend
+    const origin = request.headers.get('Origin');
+    if (origin !== ALLOWED_ORIGIN) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: cors });
+    }
+
     if (request.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: cors });
 
-    const debug = {};
+    // Rate limiting per IP
+    const ip = request.headers.get('CF-Connecting-IP');
+    if (!checkRateLimit(ip)) {
+      return new Response(JSON.stringify({ error: 'Too many requests' }), { status: 429, headers: cors });
+    }
 
     try {
       // Step 1: Parse body
-      debug.step = '1_parse_body';
       const body = await request.json();
-      debug.hasImageBase64 = !!body.imageBase64;
-      debug.imageBase64Length = body.imageBase64?.length;
 
       if (!body.imageBase64) {
-        return new Response(JSON.stringify({ error: 'Missing imageBase64', debug }), { status: 400, headers: cors });
+        return new Response(JSON.stringify({ error: 'Missing imageBase64' }), { status: 400, headers: cors });
       }
 
       // Step 2: Call Workers AI
-      debug.step = '2_workers_ai';
-      debug.model = '@cf/meta/llama-3.2-11b-vision-instruct';
-
       let aiResponse;
       try {
         aiResponse = await env.AI.run(
@@ -50,16 +70,11 @@ export default {
             max_tokens: 150,
           }
         );
-        debug.aiRawResponse = aiResponse?.response;
-        debug.aiResponseKeys = Object.keys(aiResponse || {});
       } catch (aiErr) {
-        debug.aiError = aiErr.message;
-        debug.aiErrorCode = aiErr.code;
-        return new Response(JSON.stringify({ error: 'AI step failed', debug }), { status: 500, headers: cors });
+        return new Response(JSON.stringify({ error: 'AI step failed' }), { status: 500, headers: cors });
       }
 
       // Step 3: Parse AI response (may be an object or a string)
-      debug.step = '3_parse_ai';
       let title = 'Unknown', author = 'Unknown';
       try {
         const raw = aiResponse.response;
@@ -69,23 +84,18 @@ export default {
         title = parsed.title || title;
         author = parsed.author || author;
       } catch (parseErr) {
-        debug.parseError = parseErr.message;
         const rawStr = typeof aiResponse.response === 'string' ? aiResponse.response : '';
         const tMatch = rawStr.match(/"title"\s*:\s*"([^"]+)"/);
         const aMatch = rawStr.match(/"author"\s*:\s*"([^"]+)"/);
         if (tMatch) title = tMatch[1];
         if (aMatch) author = aMatch[1];
       }
-      debug.extractedTitle = title;
-      debug.extractedAuthor = author;
 
       // Step 4: Google Books
-      debug.step = '4_google_books';
       const query = encodeURIComponent(`${title} ${author}`);
       const apiKey = env.GOOGLE_BOOKS_API_KEY ? `&key=${env.GOOGLE_BOOKS_API_KEY}` : '';
       const booksRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1${apiKey}`);
       const booksData = await booksRes.json();
-      debug.booksFound = booksData.items?.length || 0;
       const volumeInfo = booksData.items?.[0]?.volumeInfo || {};
 
       return new Response(JSON.stringify({
@@ -98,13 +108,11 @@ export default {
         description: volumeInfo.description || null,
         infoLink: volumeInfo.infoLink || null,
         thumbnail: volumeInfo.imageLinks?.thumbnail?.replace('http://', 'https://') || null,
-        debug, // remove this once working
       }), { headers: cors });
 
     } catch (err) {
       return new Response(JSON.stringify({
         error: err.message,
-        debug,
       }), { status: 500, headers: cors });
     }
   },
