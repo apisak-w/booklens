@@ -14,6 +14,21 @@ function mockGeminiResponse(text: string): void {
 	);
 }
 
+interface GeminiRequestPart {
+	text?: string;
+	inlineData?: { mimeType: string; data: string };
+}
+
+function extractRequestParts(
+	fetchMock: ReturnType<typeof vi.mocked<typeof fetch>>
+): GeminiRequestPart[] {
+	const calledInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
+	const body = JSON.parse(calledInit.body as string) as {
+		contents: { parts: GeminiRequestPart[] }[];
+	};
+	return body.contents[0]?.parts ?? [];
+}
+
 describe('geminiVision', () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
@@ -32,18 +47,16 @@ describe('geminiVision', () => {
 		const calledUrl = fetchMock.mock.calls[0]?.[0] as string;
 		expect(calledUrl).toContain('gemini-2.5-flash-lite');
 
-		const calledHeaders = (fetchMock.mock.calls[0]?.[1] as RequestInit).headers as Record<string, string>;
+		const calledHeaders = (fetchMock.mock.calls[0]?.[1] as RequestInit).headers as Record<
+			string,
+			string
+		>;
 		expect(calledHeaders['x-goog-api-key']).toBe('test-key');
 
-		const calledInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
-		const body = JSON.parse(calledInit.body as string) as {
-			contents: { parts: { text?: string; inlineData?: { mimeType: string; data: string } }[] }[];
-		};
-		const parts = body.contents[0]!.parts;
+		const parts = extractRequestParts(fetchMock);
 		expect(parts).toHaveLength(2);
-		expect(parts[0]!.text).toBe('Identify this book');
-		expect(parts[1]!.inlineData?.mimeType).toBe('image/jpeg');
-		expect(parts[1]!.inlineData?.data).toBe('base64data');
+		expect(parts[0]).toHaveProperty('text', 'Identify this book');
+		expect(parts[1]?.inlineData).toEqual({ mimeType: 'image/jpeg', data: 'base64data' });
 	});
 
 	it('throws on HTTP error', async () => {
@@ -77,12 +90,8 @@ describe('geminiText', () => {
 		expect(result).toBe('{"publisher":"Chilton"}');
 
 		const fetchMock = vi.mocked(fetch);
-		const calledInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
-		const body = JSON.parse(calledInit.body as string) as {
-			contents: { parts: { text?: string }[] }[];
-		};
-		const parts = body.contents[0]!.parts;
+		const parts = extractRequestParts(fetchMock);
 		expect(parts).toHaveLength(1);
-		expect(parts[0]!.text).toBe('Enrich this book');
+		expect(parts[0]).toHaveProperty('text', 'Enrich this book');
 	});
 });
