@@ -105,6 +105,7 @@ Architecture and design decision documents are stored in `docs/superpowers/specs
 - **Every change request must use a separate worktree.** Create a new git worktree (in `.worktrees/`) for each change request to prevent conflicts between concurrent agent sessions. Never work directly on `main` — always branch via `git worktree add .worktrees/<branch-name> -b <branch-name>`. Clean up worktrees after merging.
 - **Never commit sensitive data "to fix later."** Get it right in the first commit. If a value might be sensitive, use a variable from the start. Cleaning up history after the fact (force push, filter-repo) is costly and error-prone.
 - **Verify file/directory paths before writing.** Run `ls` or `file` to confirm a path is what you expect (e.g. not a binary) before creating files there.
+- **Verify after merge.** After a PR is merged, run `git log main --oneline -3` to confirm all expected commits landed. Never push to an already-merged branch — create a new PR instead.
 
 ## Error Self-Investigation Policy
 
