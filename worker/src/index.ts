@@ -84,7 +84,7 @@ export default {
 
 			const identification = await identifyBook(env.GEMINI_API_KEY, body.imageBase64);
 			console.log(
-				`[scan] identified: "${identification.title}" (${identification.title_confidence}) by "${identification.author}" (${identification.author_confidence}) lang=${identification.language} (${identification.language_confidence})`
+				`[scan] identified: "${identification.title}" (${String(identification.title_confidence)}) by "${identification.author}" (${String(identification.author_confidence)}) lang=${identification.language} (${String(identification.language_confidence)})`
 			);
 
 			// Check cache first

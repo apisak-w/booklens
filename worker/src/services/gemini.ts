@@ -1,4 +1,5 @@
-const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite';
+const GEMINI_BASE_URL =
+	'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite';
 
 interface GeminiPart {
 	text?: string;
@@ -21,12 +22,13 @@ async function callGemini(apiKey: string, parts: GeminiPart[]): Promise<string> 
 
 	if (!response.ok) {
 		const body = await response.text();
-		console.error(`[gemini] API error ${response.status}: ${body}`);
-		throw new Error(`Gemini API error ${response.status}`);
+		console.error(`[gemini] API error ${String(response.status)}: ${body}`);
+		throw new Error(`Gemini API error ${String(response.status)}`);
 	}
 
-	const data = (await response.json()) as GeminiResponse;
-	const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+	const data = await response.json<GeminiResponse>();
+	const candidate = data.candidates?.[0];
+	const text = candidate?.content.parts[0]?.text;
 
 	if (text === undefined) {
 		console.error(`[gemini] no candidates in response: ${JSON.stringify(data)}`);

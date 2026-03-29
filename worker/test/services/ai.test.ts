@@ -50,9 +50,7 @@ describe('identifyBook', () => {
 	});
 
 	it('parses JSON wrapped in markdown code fences', async () => {
-		mockGeminiResponse(
-			'```json\n{"title":"Dune","author":"Frank Herbert","language":"en"}\n```'
-		);
+		mockGeminiResponse('```json\n{"title":"Dune","author":"Frank Herbert","language":"en"}\n```');
 		const result = await identifyBook('test-key', 'base64data');
 		expect(result).toEqual({
 			title: 'Dune',

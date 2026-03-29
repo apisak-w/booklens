@@ -34,11 +34,13 @@ describe('geminiVision', () => {
 		expect(calledUrl).toContain('key=test-key');
 
 		const calledInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
-		const body = JSON.parse(calledInit.body as string);
+		const body = JSON.parse(calledInit.body as string) as {
+			contents: { parts: { text?: string; inlineData?: { mimeType: string; data: string } }[] }[];
+		};
 		expect(body.contents[0].parts).toHaveLength(2);
 		expect(body.contents[0].parts[0].text).toBe('Identify this book');
-		expect(body.contents[0].parts[1].inlineData.mimeType).toBe('image/jpeg');
-		expect(body.contents[0].parts[1].inlineData.data).toBe('base64data');
+		expect(body.contents[0].parts[1].inlineData?.mimeType).toBe('image/jpeg');
+		expect(body.contents[0].parts[1].inlineData?.data).toBe('base64data');
 	});
 
 	it('throws on HTTP error', async () => {
@@ -47,16 +49,11 @@ describe('geminiVision', () => {
 			vi.fn().mockResolvedValue(new Response('{"error":"bad request"}', { status: 400 }))
 		);
 
-		await expect(geminiVision('test-key', 'prompt', 'img')).rejects.toThrow(
-			'Gemini API error 400'
-		);
+		await expect(geminiVision('test-key', 'prompt', 'img')).rejects.toThrow('Gemini API error 400');
 	});
 
 	it('throws when response has no candidates', async () => {
-		vi.stubGlobal(
-			'fetch',
-			vi.fn().mockResolvedValue(new Response(JSON.stringify({})))
-		);
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({}))));
 
 		await expect(geminiVision('test-key', 'prompt', 'img')).rejects.toThrow(
 			'Gemini API returned no candidates'
@@ -78,7 +75,9 @@ describe('geminiText', () => {
 
 		const fetchMock = vi.mocked(fetch);
 		const calledInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
-		const body = JSON.parse(calledInit.body as string);
+		const body = JSON.parse(calledInit.body as string) as {
+			contents: { parts: { text?: string }[] }[];
+		};
 		expect(body.contents[0].parts).toHaveLength(1);
 		expect(body.contents[0].parts[0].text).toBe('Enrich this book');
 	});
