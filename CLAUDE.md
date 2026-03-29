@@ -16,14 +16,30 @@ Two independently deployed components in a single repo:
 ## Development Commands
 
 ```bash
+# Frontend local dev
+cd frontend && pnpm dev
+
+# Frontend build
+cd frontend && pnpm build
+
+# Frontend preview built site
+cd frontend && pnpm preview
+
+# Frontend lint + format
+cd frontend && pnpm lint
+cd frontend && pnpm format
+
+# Frontend type check
+cd frontend && pnpm check
+
 # Worker local dev
 cd worker && wrangler dev
 
 # Deploy worker
 cd worker && wrangler deploy
 
-# Deploy frontend to Pages
-wrangler pages deploy frontend --project-name=booklens
+# Deploy frontend to Pages (CI handles this; manual if needed)
+cd frontend && pnpm build && cd .. && wrangler pages deploy frontend/build --project-name=booklens
 
 # Manage worker secrets
 wrangler secret put GOOGLE_BOOKS_API_KEY --config worker/wrangler.toml
@@ -59,7 +75,8 @@ Examples:
 
 - Worker AI model: `@cf/meta/llama-3.2-11b-vision-instruct` (free tier, 10k neurons/day)
 - Worker is currently in **debug mode** — responses include a `debug` object. Remove before production.
-- No build step, bundler, or package manager — both components are single files.
+- Frontend uses SvelteKit (Svelte 5) with pnpm, built via Vite, output to `frontend/build/`.
+- Worker has no build step — single file (`worker.js`).
 - CORS is fully open (`*`) on the worker.
 
 ## Sensitive Data Policy
