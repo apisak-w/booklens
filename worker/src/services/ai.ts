@@ -22,14 +22,25 @@ export async function identifyBook(ai: Ai, imageBase64: string): Promise<BookIde
 			}
 		],
 		max_tokens: MAX_TOKENS
-	})) as { response: string };
+	})) as { response: unknown };
 
-	console.log(`[ai] raw response: ${aiResponse.response}`);
-	console.log(`[ai] image size: ${String(imageBase64.length)} chars`);
-	return parseAiResponse(aiResponse.response);
+	const raw = aiResponse.response;
+	console.log(`[ai] raw response: ${JSON.stringify(raw)}`);
+	return parseAiResponse(raw);
 }
 
-function parseAiResponse(raw: string): BookIdentification {
+function parseAiResponse(raw: unknown): BookIdentification {
+	// Handle case where Workers AI returns a parsed object directly
+	if (typeof raw === 'object' && raw !== null && isBookIdentification(raw)) {
+		const title = raw.title ?? 'Unknown';
+		const author = raw.author ?? 'Unknown';
+		return { title, author, language: detectLanguage(title) };
+	}
+
+	if (typeof raw !== 'string') {
+		return { title: 'Unknown', author: 'Unknown', language: DEFAULT_LANGUAGE };
+	}
+
 	try {
 		const cleaned = raw
 			.trim()
