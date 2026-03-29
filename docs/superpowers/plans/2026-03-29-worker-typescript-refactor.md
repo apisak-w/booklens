@@ -408,7 +408,7 @@ git commit -m "feat(worker): add AI service with TDD tests"
 - Create: `worker/src/services/google-books.ts`
 - Create: `worker/test/services/google-books.test.ts`
 
-- [ ] **Step 1: Write failing tests for `enrichBookMetadata`**
+- [x] **Step 1: Write failing tests for `enrichBookMetadata`**
 
 Create `worker/test/services/google-books.test.ts`:
 
@@ -556,12 +556,12 @@ describe('enrichBookMetadata', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `cd worker && npx vitest run test/services/google-books.test.ts`
 Expected: FAIL — module not found
 
-- [ ] **Step 3: Implement `enrichBookMetadata`**
+- [x] **Step 3: Implement `enrichBookMetadata`**
 
 Create `worker/src/services/google-books.ts`:
 
@@ -631,12 +631,12 @@ function buildFallbackMetadata(identification: BookIdentification): BookMetadata
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `cd worker && npx vitest run test/services/google-books.test.ts`
 Expected: 7 tests passing
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add worker/src/services/google-books.ts worker/test/services/google-books.test.ts
