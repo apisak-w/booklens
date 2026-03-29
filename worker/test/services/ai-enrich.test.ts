@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { enrichWithAi } from '../../src/services/ai-enrich';
 import type { BookIdentification } from '../../src/types';
 
@@ -11,19 +11,30 @@ const thaiBook: BookIdentification = {
 	language_confidence: null
 };
 
-function createMockAi(response: string): Ai {
-	return {
-		run: vi.fn().mockResolvedValue({ response })
-	} as unknown as Ai;
+function mockGeminiResponse(text: string): void {
+	vi.stubGlobal(
+		'fetch',
+		vi.fn().mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					candidates: [{ content: { parts: [{ text }] } }]
+				})
+			)
+		)
+	);
 }
 
 describe('enrichWithAi', () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	it('returns enriched metadata from AI response', async () => {
-		const ai = createMockAi(
+		mockGeminiResponse(
 			'{"publisher":"Salmon Books","publishedDate":"2003","pageCount":200,"categories":"วรรณกรรม","description":"นวนิยายเกี่ยวกับชีวิตนักศึกษา"}'
 		);
 
-		const result = await enrichWithAi(ai, thaiBook);
+		const result = await enrichWithAi('test-key', thaiBook);
 
 		expect(result.title).toBe('เด็กหอ');
 		expect(result.author).toBe('ปราบดา หยุ่น');
@@ -38,48 +49,46 @@ describe('enrichWithAi', () => {
 	});
 
 	it('handles JSON wrapped in code fences', async () => {
-		const ai = createMockAi(
+		mockGeminiResponse(
 			'```json\n{"publisher":"Salmon","publishedDate":"2003","pageCount":200,"categories":"Fiction","description":"A novel."}\n```'
 		);
 
-		const result = await enrichWithAi(ai, thaiBook);
+		const result = await enrichWithAi('test-key', thaiBook);
 		expect(result.source).toBe('ai_enriched');
 		expect(result.publisher).toBe('Salmon');
 	});
 
 	it('preserves title and author from identification, not AI', async () => {
-		const ai = createMockAi(
+		mockGeminiResponse(
 			'{"publisher":"Test","publishedDate":"2000","pageCount":100,"categories":"Test","description":"Test"}'
 		);
 
-		const result = await enrichWithAi(ai, thaiBook);
+		const result = await enrichWithAi('test-key', thaiBook);
 		expect(result.title).toBe('เด็กหอ');
 		expect(result.author).toBe('ปราบดา หยุ่น');
 	});
 
 	it('returns ai_vision fallback when AI returns garbage', async () => {
-		const ai = createMockAi('I do not know this book.');
+		mockGeminiResponse('I do not know this book.');
 
-		const result = await enrichWithAi(ai, thaiBook);
+		const result = await enrichWithAi('test-key', thaiBook);
 		expect(result.source).toBe('ai_vision');
 		expect(result.title).toBe('เด็กหอ');
 		expect(result.publisher).toBeNull();
 	});
 
-	it('returns ai_vision fallback when AI throws', async () => {
-		const ai = {
-			run: vi.fn().mockRejectedValue(new Error('AI unavailable'))
-		} as unknown as Ai;
+	it('returns ai_vision fallback when Gemini throws', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
 
-		const result = await enrichWithAi(ai, thaiBook);
+		const result = await enrichWithAi('test-key', thaiBook);
 		expect(result.source).toBe('ai_vision');
 		expect(result.title).toBe('เด็กหอ');
 	});
 
 	it('handles partial metadata with null for missing fields', async () => {
-		const ai = createMockAi('{"publisher":"Salmon Books","description":"A novel about students."}');
+		mockGeminiResponse('{"publisher":"Salmon Books","description":"A novel about students."}');
 
-		const result = await enrichWithAi(ai, thaiBook);
+		const result = await enrichWithAi('test-key', thaiBook);
 		expect(result.source).toBe('ai_enriched');
 		expect(result.publisher).toBe('Salmon Books');
 		expect(result.publishedDate).toBeNull();
