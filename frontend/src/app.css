@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+:root {
+	--cream: #f5f0e8;
+	--ink: #1a1612;
+	--rust: #c4622d;
+	--rust-light: #e8845a;
+	--sage: #4a5e4f;
+	--gold: #c9a84c;
+	--paper: #ede8dc;
+	--muted: #7a7060;
+	--border: rgba(26, 22, 18, 0.12);
+}
+
+body {
+	background: var(--cream);
+	color: var(--ink);
+	font-family: 'DM Sans', sans-serif;
+	font-weight: 300;
+	min-height: 100vh;
+	overflow-x: hidden;
+}
+
+/* Grain overlay */
+body::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+	pointer-events: none;
+	z-index: 9999;
+	opacity: 0.5;
+}
+
+/* Shared button base */
+.btn {
+	flex: 1;
+	padding: 0.65rem 1rem;
+	border-radius: 3px;
+	font-family: 'DM Sans', sans-serif;
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s;
+	letter-spacing: 0.01em;
+	border: none;
+}
+
+.btn-primary {
+	background: var(--rust);
+	color: #fff;
+}
+
+.btn-primary:hover {
+	background: #b5562a;
+}
+
+.btn-primary:disabled {
+	background: var(--muted);
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.btn-secondary {
+	background: transparent;
+	color: var(--ink);
+	border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+	background: var(--paper);
+}
