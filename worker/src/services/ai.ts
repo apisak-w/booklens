@@ -39,12 +39,23 @@ export async function identifyBook(ai: Ai, imageBase64: string): Promise<BookIde
 			}
 		],
 		max_tokens: MAX_TOKENS
-	})) as { response: string };
+	})) as { response: unknown };
 
-	return parseAiResponse(aiResponse.response);
+	const raw = aiResponse.response;
+	console.log(`[ai] raw response: ${JSON.stringify(raw)}`);
+	return parseAiResponse(raw);
 }
 
-function parseAiResponse(raw: string): BookIdentification {
+function parseAiResponse(raw: unknown): BookIdentification {
+	// Handle case where Workers AI returns a parsed object directly
+	if (typeof raw === 'object' && raw !== null && isBookIdentification(raw)) {
+		return buildIdentification(raw);
+	}
+
+	if (typeof raw !== 'string') {
+		return { title: 'Unknown', author: 'Unknown', language: DEFAULT_LANGUAGE, title_confidence: null, author_confidence: null, language_confidence: null };
+	}
+
 	try {
 		const cleaned = raw
 			.trim()
@@ -53,16 +64,7 @@ function parseAiResponse(raw: string): BookIdentification {
 		const parsed: unknown = JSON.parse(cleaned);
 
 		if (isBookIdentification(parsed)) {
-			const result: BookIdentification = {
-				title: parsed.title ?? 'Unknown',
-				author: parsed.author ?? 'Unknown',
-				language: parsed.language ?? DEFAULT_LANGUAGE,
-				title_confidence: parseConfidence(parsed.title_confidence),
-				author_confidence: parseConfidence(parsed.author_confidence),
-				language_confidence: parseConfidence(parsed.language_confidence)
-			};
-			console.log(JSON.stringify({ ai_identification: result }));
-			return result;
+			return buildIdentification(parsed);
 		}
 	} catch {
 		// Fall through to regex extraction
@@ -80,6 +82,26 @@ function isBookIdentification(value: unknown): value is {
 	language_confidence?: unknown;
 } {
 	return typeof value === 'object' && value !== null;
+}
+
+function buildIdentification(parsed: {
+	title?: string;
+	author?: string;
+	language?: string;
+	title_confidence?: unknown;
+	author_confidence?: unknown;
+	language_confidence?: unknown;
+}): BookIdentification {
+	const result: BookIdentification = {
+		title: parsed.title ?? 'Unknown',
+		author: parsed.author ?? 'Unknown',
+		language: parsed.language ?? DEFAULT_LANGUAGE,
+		title_confidence: parseConfidence(parsed.title_confidence),
+		author_confidence: parseConfidence(parsed.author_confidence),
+		language_confidence: parseConfidence(parsed.language_confidence)
+	};
+	console.log(JSON.stringify({ ai_identification: result }));
+	return result;
 }
 
 function parseConfidence(value: unknown): number | null {
