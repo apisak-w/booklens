@@ -10,7 +10,7 @@ BookLens is a web app that identifies books from cover photos using AI vision. U
 
 Two independently deployed components in a single repo:
 
-- **`frontend/`** — Single-page static site (`index.html`) deployed to **Cloudflare Pages**. Contains all HTML/CSS/JS inline. Calls the Cloudflare Worker to scan book covers.
+- **`frontend/`** — SvelteKit (Svelte 5) app deployed to **Cloudflare Pages**. Built with TypeScript, pnpm, and `@sveltejs/adapter-static` for SSG output. Calls the Cloudflare Worker to scan book covers.
 - **`worker/`** — Cloudflare Worker (`worker.js`) deployed to **Cloudflare Workers**. Receives a base64 image via `POST /scan`, runs Llama 3.2 Vision via Workers AI binding, then fetches metadata from Google Books API.
 
 ## Development Commands
@@ -88,6 +88,10 @@ Examples:
 - Any value that could identify the owner
 
 History was rewritten once to scrub leaked identifiers — avoid repeating this.
+
+## Decision Records
+
+Architecture and design decision documents are stored in `docs/superpowers/specs/`. Implementation plans are stored in `docs/superpowers/plans/`.
 
 ## Git Workflow Rules
 
