@@ -25,7 +25,7 @@
 
 		if (active) {
 			currentStep = -1;
-			barKey++;
+			barKey = Date.now();
 			delays.forEach((delay, i) => {
 				const t = setTimeout(() => {
 					currentStep = i;
