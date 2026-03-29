@@ -31,16 +31,19 @@ describe('geminiVision', () => {
 
 		const calledUrl = fetchMock.mock.calls[0]?.[0] as string;
 		expect(calledUrl).toContain('gemini-2.5-flash-lite');
-		expect(calledUrl).toContain('key=test-key');
+
+		const calledHeaders = (fetchMock.mock.calls[0]?.[1] as RequestInit).headers as Record<string, string>;
+		expect(calledHeaders['x-goog-api-key']).toBe('test-key');
 
 		const calledInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
 		const body = JSON.parse(calledInit.body as string) as {
 			contents: { parts: { text?: string; inlineData?: { mimeType: string; data: string } }[] }[];
 		};
-		expect(body.contents[0].parts).toHaveLength(2);
-		expect(body.contents[0].parts[0].text).toBe('Identify this book');
-		expect(body.contents[0].parts[1].inlineData?.mimeType).toBe('image/jpeg');
-		expect(body.contents[0].parts[1].inlineData?.data).toBe('base64data');
+		const parts = body.contents[0]!.parts;
+		expect(parts).toHaveLength(2);
+		expect(parts[0]!.text).toBe('Identify this book');
+		expect(parts[1]!.inlineData?.mimeType).toBe('image/jpeg');
+		expect(parts[1]!.inlineData?.data).toBe('base64data');
 	});
 
 	it('throws on HTTP error', async () => {
@@ -78,7 +81,8 @@ describe('geminiText', () => {
 		const body = JSON.parse(calledInit.body as string) as {
 			contents: { parts: { text?: string }[] }[];
 		};
-		expect(body.contents[0].parts).toHaveLength(1);
-		expect(body.contents[0].parts[0].text).toBe('Enrich this book');
+		const parts = body.contents[0]!.parts;
+		expect(parts).toHaveLength(1);
+		expect(parts[0]!.text).toBe('Enrich this book');
 	});
 });
