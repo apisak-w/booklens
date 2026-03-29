@@ -83,6 +83,9 @@ export default {
 			}
 
 			const identification = await identifyBook(env.AI, body.imageBase64);
+			console.log(
+				`[scan] identified: "${identification.title}" by "${identification.author}" (${identification.language})`
+			);
 
 			// Check cache first
 			const cached = await getCachedMetadata(
@@ -91,14 +94,18 @@ export default {
 				identification.author
 			);
 			if (cached) {
+				console.log(`[scan] cache hit: source=${cached.source}`);
 				return jsonResponse(cached as unknown as Record<string, unknown>, 200, cors);
 			}
+			console.log('[scan] cache miss');
 
 			// Try Google Books first, fall back to AI enrichment if no match
 			let metadata = await enrichBookMetadata(identification, env.GOOGLE_BOOKS_API_KEY);
+			console.log(`[scan] google books: source=${metadata.source}`);
 
 			if (metadata.source === 'ai_vision') {
 				metadata = await enrichWithAi(env.AI, identification);
+				console.log(`[scan] ai enrichment: source=${metadata.source}`);
 			}
 
 			// Cache successful enrichment (not ai_vision fallbacks)
@@ -109,6 +116,7 @@ export default {
 					identification.author,
 					metadata
 				);
+				console.log('[scan] cached result');
 			}
 
 			return jsonResponse(metadata as unknown as Record<string, unknown>, 200, cors);
