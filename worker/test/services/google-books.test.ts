@@ -5,7 +5,10 @@ import type { BookIdentification, GoogleBooksResponse } from '../../src/types';
 const mockIdentification: BookIdentification = {
 	title: 'Dune',
 	author: 'Frank Herbert',
-	language: 'en'
+	language: 'en',
+	title_confidence: null,
+	author_confidence: null,
+	language_confidence: null
 };
 
 function mockFetchResponse(body: GoogleBooksResponse): void {

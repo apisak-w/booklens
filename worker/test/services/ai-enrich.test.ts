@@ -2,7 +2,14 @@ import { describe, it, expect, vi } from 'vitest';
 import { enrichWithAi } from '../../src/services/ai-enrich';
 import type { BookIdentification } from '../../src/types';
 
-const thaiBook: BookIdentification = { title: 'เด็กหอ', author: 'ปราบดา หยุ่น', language: 'th' };
+const thaiBook: BookIdentification = {
+	title: 'เด็กหอ',
+	author: 'ปราบดา หยุ่น',
+	language: 'th',
+	title_confidence: null,
+	author_confidence: null,
+	language_confidence: null
+};
 
 function createMockAi(response: string): Ai {
 	return {

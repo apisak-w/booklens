@@ -17,13 +17,13 @@ describe('identifyBook', () => {
 	it('parses clean JSON with language from AI', async () => {
 		const ai = createMockAi('{"title":"Dune","author":"Frank Herbert","language":"en"}');
 		const result = await identifyBook(ai, 'base64data');
-		expect(result).toEqual({ title: 'Dune', author: 'Frank Herbert', language: 'en' });
+		expect(result).toEqual({ title: 'Dune', author: 'Frank Herbert', language: 'en', title_confidence: null, author_confidence: null, language_confidence: null });
 	});
 
 	it('parses Thai book JSON with language', async () => {
 		const ai = createMockAi('{"title":"เด็กหอ","author":"ปราบดา หยุ่น","language":"th"}');
 		const result = await identifyBook(ai, 'base64data');
-		expect(result).toEqual({ title: 'เด็กหอ', author: 'ปราบดา หยุ่น', language: 'th' });
+		expect(result).toEqual({ title: 'เด็กหอ', author: 'ปราบดา หยุ่น', language: 'th', title_confidence: null, author_confidence: null, language_confidence: null });
 	});
 
 	it('parses JSON wrapped in markdown code fences', async () => {
@@ -31,7 +31,7 @@ describe('identifyBook', () => {
 			'```json\n{"title":"Dune","author":"Frank Herbert","language":"en"}\n```'
 		);
 		const result = await identifyBook(ai, 'base64data');
-		expect(result).toEqual({ title: 'Dune', author: 'Frank Herbert', language: 'en' });
+		expect(result).toEqual({ title: 'Dune', author: 'Frank Herbert', language: 'en', title_confidence: null, author_confidence: null, language_confidence: null });
 	});
 
 	it('falls back to regex extraction when JSON parse fails', async () => {
@@ -39,19 +39,19 @@ describe('identifyBook', () => {
 			'The title is "Dune" and the author is "Frank Herbert"... {"title": "Dune", "author": "Frank Herbert", "language": "en"} extra junk'
 		);
 		const result = await identifyBook(ai, 'base64data');
-		expect(result).toEqual({ title: 'Dune', author: 'Frank Herbert', language: 'en' });
+		expect(result).toEqual({ title: 'Dune', author: 'Frank Herbert', language: 'en', title_confidence: null, author_confidence: null, language_confidence: null });
 	});
 
 	it('defaults language to "en" when AI omits it', async () => {
 		const ai = createMockAi('{"title":"Dune","author":"Frank Herbert"}');
 		const result = await identifyBook(ai, 'base64data');
-		expect(result).toEqual({ title: 'Dune', author: 'Frank Herbert', language: 'en' });
+		expect(result).toEqual({ title: 'Dune', author: 'Frank Herbert', language: 'en', title_confidence: null, author_confidence: null, language_confidence: null });
 	});
 
 	it('returns Unknown with default language when AI response is garbage', async () => {
 		const ai = createMockAi('I cannot identify this book');
 		const result = await identifyBook(ai, 'base64data');
-		expect(result).toEqual({ title: 'Unknown', author: 'Unknown', language: 'en' });
+		expect(result).toEqual({ title: 'Unknown', author: 'Unknown', language: 'en', title_confidence: null, author_confidence: null, language_confidence: null });
 	});
 
 	it('throws on AI binding failure', async () => {

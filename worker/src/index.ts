@@ -84,7 +84,7 @@ export default {
 
 			const identification = await identifyBook(env.AI, body.imageBase64);
 			console.log(
-				`[scan] identified: "${identification.title}" by "${identification.author}" (${identification.language})`
+				`[scan] identified: "${identification.title}" (${identification.title_confidence}) by "${identification.author}" (${identification.author_confidence}) lang=${identification.language} (${identification.language_confidence})`
 			);
 
 			// Check cache first
