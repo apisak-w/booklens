@@ -43,7 +43,8 @@ describe('enrichBookMetadata', () => {
 			categories: 'Fiction',
 			description: 'A science fiction novel.',
 			infoLink: 'https://books.google.com/dune',
-			thumbnail: 'https://covers.google.com/dune.jpg'
+			thumbnail: 'https://covers.google.com/dune.jpg',
+			source: 'google_books'
 		});
 	});
 
@@ -63,7 +64,8 @@ describe('enrichBookMetadata', () => {
 			categories: null,
 			description: null,
 			infoLink: null,
-			thumbnail: null
+			thumbnail: null,
+			source: 'google_books'
 		});
 	});
 
@@ -81,7 +83,8 @@ describe('enrichBookMetadata', () => {
 			categories: null,
 			description: null,
 			infoLink: null,
-			thumbnail: null
+			thumbnail: null,
+			source: 'google_books'
 		});
 	});
 
@@ -132,7 +135,8 @@ describe('enrichBookMetadata', () => {
 			categories: null,
 			description: null,
 			infoLink: null,
-			thumbnail: null
+			thumbnail: null,
+			source: 'google_books'
 		});
 	});
 });

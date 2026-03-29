@@ -28,7 +28,8 @@ export async function enrichBookMetadata(
 			categories: vol.categories?.[0] ?? null,
 			description: vol.description ?? null,
 			infoLink: vol.infoLink ?? null,
-			thumbnail: upgradeThumbnailUrl(vol.imageLinks?.thumbnail)
+			thumbnail: upgradeThumbnailUrl(vol.imageLinks?.thumbnail),
+			source: 'google_books'
 		};
 	} catch {
 		return fallback;
@@ -58,6 +59,7 @@ function buildFallbackMetadata(identification: BookIdentification): BookMetadata
 		categories: null,
 		description: null,
 		infoLink: null,
-		thumbnail: null
+		thumbnail: null,
+		source: 'google_books'
 	};
 }

@@ -29,6 +29,7 @@ export interface BookMetadata {
 	description: string | null;
 	infoLink: string | null;
 	thumbnail: string | null;
+	source: BookSource;
 }
 
 export interface GoogleBooksVolumeInfo {
