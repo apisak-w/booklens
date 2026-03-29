@@ -1,5 +1,4 @@
-const GEMINI_BASE_URL =
-	'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite';
+const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash';
 
 interface GeminiPart {
 	text?: string;

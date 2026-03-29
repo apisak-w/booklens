@@ -45,7 +45,7 @@ describe('geminiVision', () => {
 		expect(fetchMock).toHaveBeenCalledOnce();
 
 		const calledUrl = fetchMock.mock.calls[0]?.[0] as string;
-		expect(calledUrl).toContain('gemini-2.5-flash-lite');
+		expect(calledUrl).toContain('gemini-2.5-flash');
 
 		const calledHeaders = (fetchMock.mock.calls[0]?.[1] as RequestInit).headers as Record<
 			string,
