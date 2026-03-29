@@ -1,15 +1,13 @@
-name: Deploy Worker
+name: Validate Worker
 
 on:
-  push:
-    branches: [main]
+  pull_request:
     paths:
       - worker/**
-      - .github/workflows/deploy-worker.yml
-  workflow_dispatch:
+      - .github/workflows/validate-worker.yml
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,9 +26,14 @@ jobs:
         working-directory: worker
         run: pnpm install --frozen-lockfile
 
-      - uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: worker
-          command: deploy
+      - name: Type check
+        working-directory: worker
+        run: pnpm check
+
+      - name: Lint
+        working-directory: worker
+        run: pnpm lint
+
+      - name: Test
+        working-directory: worker
+        run: pnpm test

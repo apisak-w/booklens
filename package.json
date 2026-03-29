@@ -1,0 +1,26 @@
+{
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"husky": "^9.1.7",
+		"lint-staged": "^16.1.0"
+	},
+	"lint-staged": {
+		"worker/src/**/*.ts": [
+			"bash -c 'cd worker && pnpm check'",
+			"bash -c 'cd worker && pnpm lint'"
+		],
+		"worker/test/**/*.ts": [
+			"bash -c 'cd worker && pnpm check'",
+			"bash -c 'cd worker && pnpm lint'",
+			"bash -c 'cd worker && pnpm test'"
+		],
+		"frontend/**/*.{ts,svelte}": [
+			"bash -c 'cd frontend && pnpm check'",
+			"bash -c 'cd frontend && pnpm lint'"
+		]
+	}
+}
