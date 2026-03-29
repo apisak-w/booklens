@@ -108,8 +108,9 @@ export default {
 				console.log(`[scan] ai enrichment: source=${metadata.source}`);
 			}
 
-			// Cache successful enrichment (not ai_vision fallbacks)
-			if (metadata.source !== 'ai_vision') {
+			// Cache successful enrichment (skip ai_vision fallbacks and unknown identifications)
+			const isUnknown = metadata.title === 'Unknown' || metadata.author === 'Unknown';
+			if (metadata.source !== 'ai_vision' && !isUnknown) {
 				await setCachedMetadata(
 					env.BOOK_CACHE,
 					identification.title,
