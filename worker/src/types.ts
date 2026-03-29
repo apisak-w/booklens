@@ -2,8 +2,6 @@ export interface Env {
 	AI: Ai;
 	GOOGLE_BOOKS_API_KEY?: string | undefined;
 	ALLOWED_ORIGIN: string;
-	CF_BROWSER_API_TOKEN?: string | undefined;
-	CF_ACCOUNT_ID?: string | undefined;
 	BOOK_CACHE?: KVNamespace | undefined;
 }
 
@@ -11,7 +9,7 @@ export interface ScanRequestBody {
 	imageBase64: string;
 }
 
-export type BookSource = 'google_books' | 'ai_vision' | 'kinokuniya' | 'naiin' | 'se_ed';
+export type BookSource = 'google_books' | 'ai_vision' | 'ai_enriched';
 
 export interface BookIdentification {
 	title: string;
@@ -51,28 +49,4 @@ export interface GoogleBooksResponse {
 export interface RateLimitEntry {
 	count: number;
 	resetAt: number;
-}
-
-export interface ScrapeRequest {
-	url: string;
-	elements: { selector: string }[];
-	gotoOptions?: { waitUntil?: string; timeout?: number };
-}
-
-export interface ScrapeElementResult {
-	text: string;
-	html: string;
-	attributes: { name: string; value: string }[];
-	height: number;
-	width: number;
-	top: number;
-	left: number;
-}
-
-export interface ScrapeResponse {
-	success: boolean;
-	result: {
-		selector: string;
-		results: ScrapeElementResult[];
-	}[];
 }

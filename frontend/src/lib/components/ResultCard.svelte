@@ -19,20 +19,16 @@
 	);
 
 	let isAiOnly = $derived(result.source === 'ai_vision');
+	let isAiEnriched = $derived(result.source === 'ai_enriched');
 
 	let badgeText = $derived(
 		result.source === 'google_books' ? 'HIGH MATCH'
-		: result.source === 'kinokuniya' ? 'KINOKUNIYA MATCH'
-		: result.source === 'naiin' ? 'NAIIN MATCH'
-		: result.source === 'se_ed' ? 'SE-ED MATCH'
+		: result.source === 'ai_enriched' ? 'AI ENRICHED'
 		: 'AI ONLY'
 	);
 
 	let linkText = $derived(
 		result.source === 'google_books' ? 'View on Google Books'
-		: result.source === 'kinokuniya' ? 'View on Kinokuniya Thailand'
-		: result.source === 'naiin' ? 'View on Naiin'
-		: result.source === 'se_ed' ? 'View on SE-ED'
 		: ''
 	);
 </script>
@@ -42,6 +38,8 @@
 		<span class="result-label">Book identified</span>
 		{#if isAiOnly}
 			<span class="confidence-badge ai-only">{badgeText}</span>
+		{:else if isAiEnriched}
+			<span class="confidence-badge ai-enriched">{badgeText}</span>
 		{:else}
 			<span class="confidence-badge">{badgeText}</span>
 		{/if}
@@ -161,6 +159,16 @@
 		background: rgba(201, 168, 76, 0.2);
 		color: var(--gold);
 		letter-spacing: 0.05em;
+	}
+
+	.confidence-badge.ai-only {
+		background: rgba(180, 180, 180, 0.2);
+		color: rgba(245, 240, 232, 0.6);
+	}
+
+	.confidence-badge.ai-enriched {
+		background: rgba(140, 180, 220, 0.2);
+		color: rgba(160, 200, 240, 0.8);
 	}
 
 	.result-body {

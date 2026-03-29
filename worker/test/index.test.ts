@@ -123,22 +123,38 @@ describe('worker fetch handler', () => {
 		expect(json).toHaveProperty('source', 'google_books');
 	});
 
-	it('routes Thai books to Thai sources', async () => {
+	it('falls back to AI enrichment when Google Books has no match', async () => {
+		// First AI call: identify book (Thai)
+		// Second AI call: enrich metadata
+		let aiCallCount = 0;
 		const env = createEnv({
 			AI: {
-				run: vi.fn().mockResolvedValue({
-					response: '{"title":"เด็กหอ","author":"ปราบดา หยุ่น","language":"th"}'
+				run: vi.fn().mockImplementation(() => {
+					aiCallCount++;
+					if (aiCallCount === 1) {
+						return Promise.resolve({
+							response: '{"title":"เด็กหอ","author":"ปราบดา หยุ่น","language":"th"}'
+						});
+					}
+					return Promise.resolve({
+						response: '{"publisher":"Salmon Books","publishedDate":"2003","pageCount":200,"categories":"วรรณกรรม","description":"นวนิยาย"}'
+					});
 				})
 			} as unknown as Ai
 		});
 
-		// No CF_BROWSER_API_TOKEN set, so should fall back to ai_vision
+		// Google Books returns no match
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue(new Response(JSON.stringify({})))
+		);
+
 		const req = createRequest('POST', { body: { imageBase64: 'abc' } });
 		const res = await worker.fetch(req, env);
 		expect(res.status).toBe(200);
 		const json = await res.json<Record<string, unknown>>();
-		expect(json).toHaveProperty('source', 'ai_vision');
+		expect(json).toHaveProperty('source', 'ai_enriched');
 		expect(json).toHaveProperty('title', 'เด็กหอ');
-		expect(json).toHaveProperty('author', 'ปราบดา หยุ่น');
+		expect(json).toHaveProperty('publisher', 'Salmon Books');
 	});
 });

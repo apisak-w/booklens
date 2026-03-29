@@ -84,7 +84,7 @@ describe('enrichBookMetadata', () => {
 			description: null,
 			infoLink: null,
 			thumbnail: null,
-			source: 'google_books'
+			source: 'ai_vision'
 		});
 	});
 
@@ -136,7 +136,7 @@ describe('enrichBookMetadata', () => {
 			description: null,
 			infoLink: null,
 			thumbnail: null,
-			source: 'google_books'
+			source: 'ai_vision'
 		});
 	});
 });
