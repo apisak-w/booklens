@@ -10,7 +10,7 @@ export interface BookResult {
 	description: string | null;
 	infoLink: string | null;
 	thumbnail: string | null;
-	source?: BookSource;
+	source: BookSource;
 }
 
 export interface ScanResponse extends BookResult {

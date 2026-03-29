@@ -120,6 +120,8 @@ describe('worker fetch handler', () => {
 		const json = await res.json<Record<string, unknown>>();
 		expect(json).toHaveProperty('title');
 		expect(json).toHaveProperty('author');
+		expect(json).toHaveProperty('publisher');
+		expect(json).toHaveProperty('thumbnail');
 		expect(json).toHaveProperty('source', 'google_books');
 	});
 
