@@ -12,7 +12,7 @@ export async function identifyBook(ai: Ai, imageBase64: string): Promise<BookIde
 				content: [
 					{
 						type: 'text',
-						text: 'This is a book cover. Reply ONLY with JSON: {"title":"...","author":"..."}'
+						text: 'This is a book cover. Reply ONLY with JSON: {"title":"...","author":"...","language":"..."} where language is an ISO 639-1 code like "en", "th", "ja".'
 					},
 					{
 						type: 'image_url',
@@ -32,9 +32,7 @@ export async function identifyBook(ai: Ai, imageBase64: string): Promise<BookIde
 function parseAiResponse(raw: unknown): BookIdentification {
 	// Handle case where Workers AI returns a parsed object directly
 	if (typeof raw === 'object' && raw !== null && isBookIdentification(raw)) {
-		const title = raw.title ?? 'Unknown';
-		const author = raw.author ?? 'Unknown';
-		return { title, author, language: detectLanguage(title) };
+		return buildIdentification(raw.title, raw.author, raw.language);
 	}
 
 	if (typeof raw !== 'string') {
@@ -49,9 +47,7 @@ function parseAiResponse(raw: unknown): BookIdentification {
 		const parsed: unknown = JSON.parse(cleaned);
 
 		if (isBookIdentification(parsed)) {
-			const title = parsed.title ?? 'Unknown';
-			const author = parsed.author ?? 'Unknown';
-			return { title, author, language: detectLanguage(title) };
+			return buildIdentification(parsed.title, parsed.author, parsed.language);
 		}
 	} catch {
 		// Fall through to regex extraction
@@ -60,20 +56,31 @@ function parseAiResponse(raw: unknown): BookIdentification {
 	return extractWithRegex(raw);
 }
 
-function isBookIdentification(value: unknown): value is { title?: string; author?: string } {
+function isBookIdentification(
+	value: unknown
+): value is { title?: string; author?: string; language?: string } {
 	return typeof value === 'object' && value !== null;
+}
+
+function buildIdentification(
+	title?: string,
+	author?: string,
+	language?: string
+): BookIdentification {
+	const t = title ?? 'Unknown';
+	return {
+		title: t,
+		author: author ?? 'Unknown',
+		language: language ?? detectLanguage(t)
+	};
 }
 
 function extractWithRegex(raw: string): BookIdentification {
 	const titleMatch = /"title"\s*:\s*"([^"]+)"/.exec(raw);
 	const authorMatch = /"author"\s*:\s*"([^"]+)"/.exec(raw);
-	const title = titleMatch?.[1] ?? 'Unknown';
+	const languageMatch = /"language"\s*:\s*"([^"]+)"/.exec(raw);
 
-	return {
-		title,
-		author: authorMatch?.[1] ?? 'Unknown',
-		language: detectLanguage(title)
-	};
+	return buildIdentification(titleMatch?.[1], authorMatch?.[1], languageMatch?.[1]);
 }
 
 const THAI_RANGE = /[\u0E00-\u0E7F]/;
