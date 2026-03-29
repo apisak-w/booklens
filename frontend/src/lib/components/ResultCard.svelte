@@ -17,12 +17,34 @@
 			? result.description.slice(0, 280) + (result.description.length > 280 ? '…' : '')
 			: 'No description available.'
 	);
+
+	let isAiOnly = $derived(result.source === 'ai_vision');
+
+	let badgeText = $derived(
+		result.source === 'google_books' ? 'HIGH MATCH'
+		: result.source === 'kinokuniya' ? 'KINOKUNIYA MATCH'
+		: result.source === 'naiin' ? 'NAIIN MATCH'
+		: result.source === 'se_ed' ? 'SE-ED MATCH'
+		: 'AI ONLY'
+	);
+
+	let linkText = $derived(
+		result.source === 'google_books' ? 'View on Google Books'
+		: result.source === 'kinokuniya' ? 'View on Kinokuniya Thailand'
+		: result.source === 'naiin' ? 'View on Naiin'
+		: result.source === 'se_ed' ? 'View on SE-ED'
+		: ''
+	);
 </script>
 
 <div class="result-card">
 	<div class="result-header">
 		<span class="result-label">Book identified</span>
-		<span class="confidence-badge">HIGH MATCH</span>
+		{#if isAiOnly}
+			<span class="confidence-badge ai-only">{badgeText}</span>
+		{:else}
+			<span class="confidence-badge">{badgeText}</span>
+		{/if}
 	</div>
 	<div class="result-body">
 		<!-- Mobile: cover + title row (hidden on desktop via +page.svelte responsive) -->
@@ -81,7 +103,7 @@
 		{#if result.infoLink}
 			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 			<a href={result.infoLink} target="_blank" rel="noopener noreferrer" class="google-books-link">
-				View on Google Books
+				{linkText}
 				<svg viewBox="0 0 24 24"
 					><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline
 						points="15 3 21 3 21 9"
