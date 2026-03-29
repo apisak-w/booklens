@@ -1,7 +1,6 @@
 import type { BookIdentification } from '../types';
+import { geminiVision } from './gemini';
 
-const AI_MODEL = '@cf/google/gemma-3-12b-it';
-const MAX_TOKENS = 150;
 const DEFAULT_LANGUAGE = 'en';
 const BOOK_IDENTIFICATION_PROMPT = `
 You are analyzing a book cover image. Your task is to extract bibliographic metadata visible on the cover.
@@ -21,41 +20,16 @@ Reply ONLY with a single valid JSON object, no explanation, no markdown:
 {"title":"...","title_confidence":0.0,"author":"...","author_confidence":0.0,"language":"...","language_confidence":0.0}
 `;
 
-export async function identifyBook(ai: Ai, imageBase64: string): Promise<BookIdentification> {
-	const aiResponse = (await ai.run(AI_MODEL, {
-		messages: [
-			{
-				role: 'user',
-				content: [
-					{
-						type: 'text',
-						text: BOOK_IDENTIFICATION_PROMPT
-					},
-					{
-						type: 'image_url',
-						image_url: { url: `data:image/jpeg;base64,${imageBase64}` }
-					}
-				]
-			}
-		],
-		max_tokens: MAX_TOKENS
-	})) as { response: unknown };
-
-	const raw = aiResponse.response;
+export async function identifyBook(
+	apiKey: string,
+	imageBase64: string
+): Promise<BookIdentification> {
+	const raw = await geminiVision(apiKey, BOOK_IDENTIFICATION_PROMPT, imageBase64);
 	console.log(`[ai] raw response: ${JSON.stringify(raw)}`);
 	return parseAiResponse(raw);
 }
 
-function parseAiResponse(raw: unknown): BookIdentification {
-	// Handle case where Workers AI returns a parsed object directly
-	if (typeof raw === 'object' && raw !== null && isBookIdentification(raw)) {
-		return buildIdentification(raw);
-	}
-
-	if (typeof raw !== 'string') {
-		return { title: 'Unknown', author: 'Unknown', language: DEFAULT_LANGUAGE, title_confidence: null, author_confidence: null, language_confidence: null };
-	}
-
+function parseAiResponse(raw: string): BookIdentification {
 	try {
 		const cleaned = raw
 			.trim()
