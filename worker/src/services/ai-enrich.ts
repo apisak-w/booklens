@@ -1,32 +1,23 @@
 import type { BookIdentification, BookMetadata } from '../types';
-
-const AI_MODEL = '@cf/meta/llama-3.2-11b-vision-instruct';
-const MAX_TOKENS = 500;
+import { geminiText } from './gemini';
 
 export async function enrichWithAi(
-	ai: Ai,
+	apiKey: string,
 	identification: BookIdentification
 ): Promise<BookMetadata> {
 	const fallback = buildFallback(identification);
 
 	try {
-		const aiResponse = (await ai.run(AI_MODEL, {
-			messages: [
-				{
-					role: 'user',
-					content: `You are a book metadata expert. I identified a book from its cover:
+		const prompt = `You are a book metadata expert. I identified a book from its cover:
 Title: "${identification.title}"
 Author: "${identification.author}"
 Language: "${identification.language}"
 
 Reply ONLY with JSON containing what you know about this book:
-{"publisher":"...","publishedDate":"YYYY","pageCount":123,"categories":"...","description":"..."}`
-				}
-			],
-			max_tokens: MAX_TOKENS
-		})) as { response: string };
+{"publisher":"...","publishedDate":"YYYY","pageCount":123,"categories":"...","description":"..."}`;
 
-		return parseEnrichmentResponse(aiResponse.response, identification);
+		const raw = await geminiText(apiKey, prompt);
+		return parseEnrichmentResponse(raw, identification);
 	} catch {
 		return fallback;
 	}

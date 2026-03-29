@@ -1,5 +1,5 @@
 export interface Env {
-	AI: Ai;
+	GEMINI_API_KEY: string;
 	GOOGLE_BOOKS_API_KEY?: string | undefined;
 	ALLOWED_ORIGIN: string;
 	BOOK_CACHE?: KVNamespace | undefined;
@@ -15,6 +15,9 @@ export interface BookIdentification {
 	title: string;
 	author: string;
 	language: string;
+	title_confidence: number | null;
+	author_confidence: number | null;
+	language_confidence: number | null;
 }
 
 export interface BookMetadata {

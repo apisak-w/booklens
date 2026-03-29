@@ -4,11 +4,7 @@ import type { Env } from '../src/types';
 
 function createEnv(overrides: Partial<Env> = {}): Env {
 	return {
-		AI: {
-			run: vi.fn().mockResolvedValue({
-				response: '{"title":"Dune","author":"Frank Herbert","language":"en"}'
-			})
-		} as unknown as Ai,
+		GEMINI_API_KEY: 'test-gemini-key',
 		ALLOWED_ORIGIN: 'https://example.com',
 		GOOGLE_BOOKS_API_KEY: 'test-key',
 		...overrides
@@ -39,27 +35,52 @@ describe('worker fetch handler', () => {
 		vi.restoreAllMocks();
 		vi.stubGlobal(
 			'fetch',
-			vi.fn().mockResolvedValue(
-				new Response(
-					JSON.stringify({
-						items: [
-							{
-								volumeInfo: {
-									title: 'Dune',
-									authors: ['Frank Herbert'],
-									publisher: 'Chilton Books',
-									publishedDate: '1965',
-									pageCount: 412,
-									categories: ['Fiction'],
-									description: 'A novel.',
-									infoLink: 'https://books.google.com/dune',
-									imageLinks: { thumbnail: 'https://covers.google.com/dune.jpg' }
+			vi.fn().mockImplementation((url: string) => {
+				// Gemini API calls
+				if (url.includes('generativelanguage.googleapis.com')) {
+					return Promise.resolve(
+						new Response(
+							JSON.stringify({
+								candidates: [
+									{
+										content: {
+											parts: [
+												{
+													text: '{"title":"Dune","author":"Frank Herbert","language":"en"}'
+												}
+											]
+										}
+									}
+								]
+							})
+						)
+					);
+				}
+				// Google Books API calls
+				return Promise.resolve(
+					new Response(
+						JSON.stringify({
+							items: [
+								{
+									volumeInfo: {
+										title: 'Dune',
+										authors: ['Frank Herbert'],
+										publisher: 'Chilton Books',
+										publishedDate: '1965',
+										pageCount: 412,
+										categories: ['Fiction'],
+										description: 'A novel.',
+										infoLink: 'https://books.google.com/dune',
+										imageLinks: {
+											thumbnail: 'https://covers.google.com/dune.jpg'
+										}
+									}
 								}
-							}
-						]
-					})
-				)
-			)
+							]
+						})
+					)
+				);
+			})
 		);
 	});
 
@@ -126,29 +147,57 @@ describe('worker fetch handler', () => {
 	});
 
 	it('falls back to AI enrichment when Google Books has no match', async () => {
-		// First AI call: identify book (Thai)
-		// Second AI call: enrich metadata
-		let aiCallCount = 0;
-		const env = createEnv({
-			AI: {
-				run: vi.fn().mockImplementation(() => {
-					aiCallCount++;
-					if (aiCallCount === 1) {
-						return Promise.resolve({
-							response: '{"title":"เด็กหอ","author":"ปราบดา หยุ่น","language":"th"}'
-						});
+		let geminiCallCount = 0;
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockImplementation((url: string) => {
+				if (url.includes('generativelanguage.googleapis.com')) {
+					geminiCallCount++;
+					if (geminiCallCount === 1) {
+						// First call: book identification
+						return Promise.resolve(
+							new Response(
+								JSON.stringify({
+									candidates: [
+										{
+											content: {
+												parts: [
+													{
+														text: '{"title":"เด็กหอ","author":"ปราบดา หยุ่น","language":"th"}'
+													}
+												]
+											}
+										}
+									]
+								})
+							)
+						);
 					}
-					return Promise.resolve({
-						response:
-							'{"publisher":"Salmon Books","publishedDate":"2003","pageCount":200,"categories":"วรรณกรรม","description":"นวนิยาย"}'
-					});
-				})
-			} as unknown as Ai
-		});
+					// Second call: enrichment
+					return Promise.resolve(
+						new Response(
+							JSON.stringify({
+								candidates: [
+									{
+										content: {
+											parts: [
+												{
+													text: '{"publisher":"Salmon Books","publishedDate":"2003","pageCount":200,"categories":"วรรณกรรม","description":"นวนิยาย"}'
+												}
+											]
+										}
+									}
+								]
+							})
+						)
+					);
+				}
+				// Google Books returns no match
+				return Promise.resolve(new Response(JSON.stringify({})));
+			})
+		);
 
-		// Google Books returns no match
-		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({}))));
-
+		const env = createEnv();
 		const req = createRequest('POST', { body: { imageBase64: 'abc' } });
 		const res = await worker.fetch(req, env);
 		expect(res.status).toBe(200);

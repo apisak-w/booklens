@@ -2,10 +2,6 @@ name = "booklens-worker"
 main = "src/index.ts"
 compatibility_date = "2024-09-23"
 
-# Enables Cloudflare Workers AI binding
-[ai]
-binding = "AI"
-
 # Environment variables
 # Add your Google Books API key here (optional but recommended for higher rate limits)
 # Get one free at: https://console.cloud.google.com/apis/library/books.googleapis.com
