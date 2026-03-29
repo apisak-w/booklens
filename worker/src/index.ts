@@ -1,6 +1,8 @@
 import type { Env, ScanRequestBody, RateLimitEntry } from './types';
 import { identifyBook } from './services/ai';
 import { enrichBookMetadata } from './services/google-books';
+import { enrichFromThaiSources } from './services/thai-books';
+import { getCachedMetadata, setCachedMetadata } from './services/cache';
 
 const RATE_LIMIT = 10;
 const RATE_WINDOW_MS = 60_000;
@@ -81,7 +83,22 @@ export default {
 			}
 
 			const identification = await identifyBook(env.AI, body.imageBase64);
-			const metadata = await enrichBookMetadata(identification, env.GOOGLE_BOOKS_API_KEY);
+
+			// Check cache first
+			const cached = await getCachedMetadata(env.BOOK_CACHE, identification.title, identification.author);
+			if (cached) {
+				return jsonResponse(cached as unknown as Record<string, unknown>, 200, cors);
+			}
+
+			// Route based on detected language
+			const metadata = identification.language === 'th'
+				? await enrichFromThaiSources(identification, env.CF_BROWSER_API_TOKEN, env.CF_ACCOUNT_ID)
+				: await enrichBookMetadata(identification, env.GOOGLE_BOOKS_API_KEY);
+
+			// Cache successful enrichment (not ai_vision fallbacks)
+			if (metadata.source !== 'ai_vision') {
+				await setCachedMetadata(env.BOOK_CACHE, identification.title, identification.author, metadata);
+			}
 
 			return jsonResponse(metadata as unknown as Record<string, unknown>, 200, cors);
 		} catch {

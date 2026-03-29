@@ -25,3 +25,7 @@ enabled = true
 
 # For local development: wrangler dev
 # To deploy: wrangler deploy
+
+[[kv_namespaces]]
+binding = "BOOK_CACHE"
+id = "TBD_AFTER_CREATION"
