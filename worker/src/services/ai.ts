@@ -28,13 +28,16 @@ export async function identifyBook(ai: Ai, imageBase64: string): Promise<BookIde
 
 function parseAiResponse(raw: string): BookIdentification {
 	try {
-		const cleaned = raw.trim().replace(/```json\n?|```/g, '').trim();
+		const cleaned = raw
+			.trim()
+			.replace(/```json\n?|```/g, '')
+			.trim();
 		const parsed: unknown = JSON.parse(cleaned);
 
 		if (isBookIdentification(parsed)) {
 			return {
-				title: parsed.title || 'Unknown',
-				author: parsed.author || 'Unknown'
+				title: parsed.title ?? 'Unknown',
+				author: parsed.author ?? 'Unknown'
 			};
 		}
 	} catch {
@@ -49,8 +52,8 @@ function isBookIdentification(value: unknown): value is { title?: string; author
 }
 
 function extractWithRegex(raw: string): BookIdentification {
-	const titleMatch = raw.match(/"title"\s*:\s*"([^"]+)"/);
-	const authorMatch = raw.match(/"author"\s*:\s*"([^"]+)"/);
+	const titleMatch = /"title"\s*:\s*"([^"]+)"/.exec(raw);
+	const authorMatch = /"author"\s*:\s*"([^"]+)"/.exec(raw);
 
 	return {
 		title: titleMatch?.[1] ?? 'Unknown',

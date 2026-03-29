@@ -1,14 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { enrichBookMetadata } from '../../src/services/google-books.js';
 import type { BookIdentification, GoogleBooksResponse } from '../../src/types.js';
 
 const mockIdentification: BookIdentification = { title: 'Dune', author: 'Frank Herbert' };
 
 function mockFetchResponse(body: GoogleBooksResponse): void {
-	vi.stubGlobal(
-		'fetch',
-		vi.fn().mockResolvedValue(new Response(JSON.stringify(body)))
-	);
+	vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify(body))));
 }
 
 describe('enrichBookMetadata', () => {
@@ -93,8 +90,8 @@ describe('enrichBookMetadata', () => {
 		await enrichBookMetadata(mockIdentification, 'my-key');
 
 		const fetchMock = vi.mocked(fetch);
-		const calledUrl = fetchMock.mock.calls[0]?.[0];
-		expect(String(calledUrl)).toContain('key=my-key');
+		const calledUrl = fetchMock.mock.calls[0]?.[0] as string;
+		expect(calledUrl).toContain('key=my-key');
 	});
 
 	it('omits API key from query string when undefined', async () => {
@@ -102,8 +99,8 @@ describe('enrichBookMetadata', () => {
 		await enrichBookMetadata(mockIdentification, undefined);
 
 		const fetchMock = vi.mocked(fetch);
-		const calledUrl = fetchMock.mock.calls[0]?.[0];
-		expect(String(calledUrl)).not.toContain('key=');
+		const calledUrl = fetchMock.mock.calls[0]?.[0] as string;
+		expect(calledUrl).not.toContain('key=');
 	});
 
 	it('upgrades http:// thumbnails to https://', async () => {

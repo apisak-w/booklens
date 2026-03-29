@@ -27,7 +27,9 @@ describe('identifyBook', () => {
 	});
 
 	it('falls back to regex extraction when JSON parse fails', async () => {
-		const ai = createMockAi('The title is "Dune" and the author is "Frank Herbert"... {"title": "Dune", "author": "Frank Herbert"} extra junk');
+		const ai = createMockAi(
+			'The title is "Dune" and the author is "Frank Herbert"... {"title": "Dune", "author": "Frank Herbert"} extra junk'
+		);
 		const result = await identifyBook(ai, 'base64data');
 		expect(result).toEqual({ title: 'Dune', author: 'Frank Herbert' });
 	});

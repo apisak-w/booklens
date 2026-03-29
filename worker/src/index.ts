@@ -28,22 +28,29 @@ function corsHeaders(allowedOrigin: string): Record<string, string> {
 	};
 }
 
-function jsonResponse(body: Record<string, unknown>, status: number, headers: Record<string, string>): Response {
+function jsonResponse(
+	body: Record<string, unknown>,
+	status: number,
+	headers: Record<string, string>
+): Response {
 	return new Response(JSON.stringify(body), { status, headers });
 }
 
 function isScanRequestBody(value: unknown): value is ScanRequestBody {
-	return typeof value === 'object' && value !== null && 'imageBase64' in value && typeof (value as ScanRequestBody).imageBase64 === 'string';
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'imageBase64' in value &&
+		typeof (value as ScanRequestBody).imageBase64 === 'string'
+	);
 }
 
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		if (!('ALLOWED_ORIGIN' in env) || env.ALLOWED_ORIGIN === '') {
-			return jsonResponse(
-				{ error: 'Server misconfiguration: ALLOWED_ORIGIN not set' },
-				500,
-				{ 'Content-Type': 'application/json' }
-			);
+			return jsonResponse({ error: 'Server misconfiguration: ALLOWED_ORIGIN not set' }, 500, {
+				'Content-Type': 'application/json'
+			});
 		}
 
 		const cors = corsHeaders(env.ALLOWED_ORIGIN);

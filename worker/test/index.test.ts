@@ -99,12 +99,12 @@ describe('worker fetch handler', () => {
 	it('returns 500 when ALLOWED_ORIGIN not set', async () => {
 		const env = createEnv({ ALLOWED_ORIGIN: '' as unknown as string });
 		// Override with truly missing value
-		delete (env as Record<string, unknown>)['ALLOWED_ORIGIN'];
+		delete (env as unknown as Record<string, unknown>).ALLOWED_ORIGIN;
 		const envWithout = env as unknown as Env;
 		const req = createRequest('POST', { body: { imageBase64: 'abc' } });
 		const res = await worker.fetch(req, envWithout);
 		expect(res.status).toBe(500);
-		const json = (await res.json()) as { error: string };
+		const json = await res.json<{ error: string }>();
 		expect(json.error).toContain('ALLOWED_ORIGIN');
 	});
 
@@ -129,7 +129,7 @@ describe('worker fetch handler', () => {
 		const req = createRequest('POST', { body: { imageBase64: 'abc' } });
 		const res = await worker.fetch(req, env);
 		expect(res.status).toBe(200);
-		const json = (await res.json()) as Record<string, unknown>;
+		const json = await res.json<Record<string, unknown>>();
 		expect(json).toHaveProperty('title');
 		expect(json).toHaveProperty('author');
 		expect(json).toHaveProperty('publisher');

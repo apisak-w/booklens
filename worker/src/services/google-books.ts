@@ -11,7 +11,7 @@ export async function enrichBookMetadata(
 	try {
 		const url = buildSearchUrl(identification, apiKey);
 		const response = await fetch(url);
-		const data = (await response.json()) as GoogleBooksResponse;
+		const data = await response.json<GoogleBooksResponse>();
 		const firstItem = data.items?.[0];
 
 		if (!firstItem) {

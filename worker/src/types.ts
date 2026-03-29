@@ -38,7 +38,7 @@ export interface GoogleBooksVolumeInfo {
 }
 
 export interface GoogleBooksResponse {
-	items?: Array<{ volumeInfo: GoogleBooksVolumeInfo }> | undefined;
+	items?: { volumeInfo: GoogleBooksVolumeInfo }[] | undefined;
 }
 
 export interface RateLimitEntry {
