@@ -1,6 +1,6 @@
-import type { Env, ScanRequestBody, RateLimitEntry } from './types.js';
-import { identifyBook } from './services/ai.js';
-import { enrichBookMetadata } from './services/google-books.js';
+import type { Env, ScanRequestBody, RateLimitEntry } from './types';
+import { identifyBook } from './services/ai';
+import { enrichBookMetadata } from './services/google-books';
 
 const RATE_LIMIT = 10;
 const RATE_WINDOW_MS = 60_000;

@@ -1,4 +1,4 @@
-import type { BookIdentification, BookMetadata, GoogleBooksResponse } from '../types.js';
+import type { BookIdentification, BookMetadata, GoogleBooksResponse } from '../types';
 
 const GOOGLE_BOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
 

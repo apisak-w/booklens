@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { identifyBook } from '../../src/services/ai.js';
+import { identifyBook } from '../../src/services/ai';
 
 function createMockAi(response: string): Ai {
 	return {

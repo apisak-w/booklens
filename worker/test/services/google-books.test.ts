@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { enrichBookMetadata } from '../../src/services/google-books.js';
-import type { BookIdentification, GoogleBooksResponse } from '../../src/types.js';
+import { enrichBookMetadata } from '../../src/services/google-books';
+import type { BookIdentification, GoogleBooksResponse } from '../../src/types';
 
 const mockIdentification: BookIdentification = { title: 'Dune', author: 'Frank Herbert' };
 

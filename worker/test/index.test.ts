@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import worker from '../src/index.js';
-import type { Env } from '../src/types.js';
+import worker from '../src/index';
+import type { Env } from '../src/types';
 
 function createEnv(overrides: Partial<Env> = {}): Env {
 	return {

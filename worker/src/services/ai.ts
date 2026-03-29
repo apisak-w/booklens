@@ -1,4 +1,4 @@
-import type { BookIdentification } from '../types.js';
+import type { BookIdentification } from '../types';
 
 const AI_MODEL = '@cf/meta/llama-3.2-11b-vision-instruct';
 const MAX_TOKENS = 150;
