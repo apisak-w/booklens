@@ -82,7 +82,7 @@ export default {
 				return jsonResponse({ error: 'Missing imageBase64' }, 400, cors);
 			}
 
-			const identification = await identifyBook(env.AI, body.imageBase64);
+			const identification = await identifyBook(env.GEMINI_API_KEY, body.imageBase64);
 			console.log(
 				`[scan] identified: "${identification.title}" (${identification.title_confidence}) by "${identification.author}" (${identification.author_confidence}) lang=${identification.language} (${identification.language_confidence})`
 			);
@@ -124,7 +124,7 @@ export default {
 				console.log(`[scan] google books: source=${metadata.source}`);
 
 				if (metadata.source === 'ai_vision') {
-					metadata = await enrichWithAi(env.AI, identification);
+					metadata = await enrichWithAi(env.GEMINI_API_KEY, identification);
 					console.log(`[scan] ai enrichment: source=${metadata.source}`);
 				}
 			}
