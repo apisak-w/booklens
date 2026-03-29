@@ -79,6 +79,7 @@
 		</div>
 
 		{#if result.infoLink}
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 			<a href={result.infoLink} target="_blank" rel="noopener noreferrer" class="google-books-link">
 				View on Google Books
 				<svg viewBox="0 0 24 24"

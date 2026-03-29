@@ -46,7 +46,7 @@
 			{/key}
 		</div>
 		<div class="loading-steps">
-			{#each steps as step, i}
+			{#each steps as step, i (i)}
 				<div class="step" class:active={currentStep === i} class:done={currentStep > i}>
 					<div class="step-dot"></div>
 					{step}
