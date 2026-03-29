@@ -5,7 +5,7 @@ import type { BookMetadata } from '../../src/types';
 function createMockKV(store: Map<string, string> = new Map()) {
 	return {
 		get: vi.fn((key: string) => Promise.resolve(store.get(key) ?? null)),
-		put: vi.fn((key: string, value: string, opts?: { expirationTtl?: number }) => {
+		put: vi.fn((key: string, value: string, _opts?: { expirationTtl?: number }) => {
 			store.set(key, value);
 			return Promise.resolve();
 		})

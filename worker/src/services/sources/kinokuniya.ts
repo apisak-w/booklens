@@ -72,7 +72,7 @@ export const kinokuniyaSource: ThaiBookSource = {
 		for (const text of tdTexts) {
 			const pageMatch = /^(\d+)$/.exec(text);
 			if (pageMatch && !pageCount) {
-				pageCount = parseInt(pageMatch[1], 10);
+				pageCount = parseInt(pageMatch[1]!, 10);
 			} else if (!publisher && text.length > 2 && !/^\d{10,13}$/.test(text)) {
 				if (!publisher) publisher = text;
 				else if (!categories) categories = text;

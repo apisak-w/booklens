@@ -33,7 +33,7 @@ function extractFromRichText(result: ScrapeResult, label: string): string | null
 		const text = p.text.trim();
 		const pattern = new RegExp(`${label}\\s*:?\\s*(.+)`, 'i');
 		const match = pattern.exec(text);
-		if (match) return match[1].trim();
+		if (match?.[1]) return match[1].trim();
 	}
 	return null;
 }
@@ -42,7 +42,7 @@ function extractPageCount(result: ScrapeResult): number | null {
 	const paragraphs = findSelector(result, 'p.mpe-theme-paragraph')?.results ?? [];
 	for (const p of paragraphs) {
 		const match = /(\d+)\s*หน้า/.exec(p.text);
-		if (match) return parseInt(match[1], 10);
+		if (match?.[1]) return parseInt(match[1], 10);
 	}
 	return null;
 }

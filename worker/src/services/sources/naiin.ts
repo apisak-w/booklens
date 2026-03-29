@@ -23,8 +23,8 @@ function parseLabelValuePairs(result: ScrapeResult): Map<string, string> {
 	const map = new Map<string, string>();
 
 	for (let i = 0; i < labels.length && i < values.length; i++) {
-		const key = labels[i].text.trim();
-		const val = values[i].text.trim();
+		const key = labels[i]!.text.trim();
+		const val = values[i]!.text.trim();
 		if (key && val) map.set(key, val);
 	}
 
