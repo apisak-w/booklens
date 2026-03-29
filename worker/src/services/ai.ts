@@ -49,7 +49,9 @@ function parseAiResponse(raw: string): BookIdentification {
 	return extractWithRegex(raw);
 }
 
-function isBookIdentification(value: unknown): value is { title?: string; author?: string; language?: string } {
+function isBookIdentification(
+	value: unknown
+): value is { title?: string; author?: string; language?: string } {
 	return typeof value === 'object' && value !== null;
 }
 

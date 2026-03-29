@@ -27,7 +27,9 @@ describe('identifyBook', () => {
 	});
 
 	it('parses JSON wrapped in markdown code fences', async () => {
-		const ai = createMockAi('```json\n{"title":"Dune","author":"Frank Herbert","language":"en"}\n```');
+		const ai = createMockAi(
+			'```json\n{"title":"Dune","author":"Frank Herbert","language":"en"}\n```'
+		);
 		const result = await identifyBook(ai, 'base64data');
 		expect(result).toEqual({ title: 'Dune', author: 'Frank Herbert', language: 'en' });
 	});

@@ -15,7 +15,7 @@ export async function getCachedMetadata(
 
 	try {
 		const cached = await kv.get(buildCacheKey(title, author));
-		if (!cached) return null;
+		if (cached === null) return null;
 		return JSON.parse(cached) as BookMetadata;
 	} catch {
 		return null;

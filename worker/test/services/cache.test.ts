@@ -2,10 +2,10 @@ import { describe, it, expect, vi } from 'vitest';
 import { getCachedMetadata, setCachedMetadata, buildCacheKey } from '../../src/services/cache';
 import type { BookMetadata } from '../../src/types';
 
-function createMockKV(store: Map<string, string> = new Map()) {
+function createMockKV(store = new Map<string, string>()): KVNamespace {
 	return {
 		get: vi.fn((key: string) => Promise.resolve(store.get(key) ?? null)),
-		put: vi.fn((key: string, value: string, _opts?: { expirationTtl?: number }) => {
+		put: vi.fn((key: string, value: string) => {
 			store.set(key, value);
 			return Promise.resolve();
 		})
@@ -37,7 +37,7 @@ describe('buildCacheKey', () => {
 
 describe('getCachedMetadata', () => {
 	it('returns cached metadata on hit', async () => {
-		const store = new Map([['dune:frank herbert', JSON.stringify(sampleMetadata)]]);
+		const store = new Map<string, string>([['dune:frank herbert', JSON.stringify(sampleMetadata)]]);
 		const kv = createMockKV(store);
 
 		const result = await getCachedMetadata(kv, 'Dune', 'Frank Herbert');
@@ -67,11 +67,10 @@ describe('setCachedMetadata', () => {
 		const kv = createMockKV();
 		await setCachedMetadata(kv, 'Dune', 'Frank Herbert', sampleMetadata);
 
-		expect(kv.put).toHaveBeenCalledWith(
-			'dune:frank herbert',
-			JSON.stringify(sampleMetadata),
-			{ expirationTtl: 604800 }
-		);
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		expect(kv.put).toHaveBeenCalledWith('dune:frank herbert', JSON.stringify(sampleMetadata), {
+			expirationTtl: 604800
+		});
 	});
 
 	it('does nothing when KV is undefined', async () => {

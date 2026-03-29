@@ -85,7 +85,11 @@ export default {
 			const identification = await identifyBook(env.AI, body.imageBase64);
 
 			// Check cache first
-			const cached = await getCachedMetadata(env.BOOK_CACHE, identification.title, identification.author);
+			const cached = await getCachedMetadata(
+				env.BOOK_CACHE,
+				identification.title,
+				identification.author
+			);
 			if (cached) {
 				return jsonResponse(cached as unknown as Record<string, unknown>, 200, cors);
 			}
@@ -99,7 +103,12 @@ export default {
 
 			// Cache successful enrichment (not ai_vision fallbacks)
 			if (metadata.source !== 'ai_vision') {
-				await setCachedMetadata(env.BOOK_CACHE, identification.title, identification.author, metadata);
+				await setCachedMetadata(
+					env.BOOK_CACHE,
+					identification.title,
+					identification.author,
+					metadata
+				);
 			}
 
 			return jsonResponse(metadata as unknown as Record<string, unknown>, 200, cors);

@@ -139,17 +139,15 @@ describe('worker fetch handler', () => {
 						});
 					}
 					return Promise.resolve({
-						response: '{"publisher":"Salmon Books","publishedDate":"2003","pageCount":200,"categories":"วรรณกรรม","description":"นวนิยาย"}'
+						response:
+							'{"publisher":"Salmon Books","publishedDate":"2003","pageCount":200,"categories":"วรรณกรรม","description":"นวนิยาย"}'
 					});
 				})
 			} as unknown as Ai
 		});
 
 		// Google Books returns no match
-		vi.stubGlobal(
-			'fetch',
-			vi.fn().mockResolvedValue(new Response(JSON.stringify({})))
-		);
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({}))));
 
 		const req = createRequest('POST', { body: { imageBase64: 'abc' } });
 		const res = await worker.fetch(req, env);

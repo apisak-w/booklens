@@ -32,10 +32,7 @@ Reply ONLY with JSON containing what you know about this book:
 	}
 }
 
-function parseEnrichmentResponse(
-	raw: string,
-	identification: BookIdentification
-): BookMetadata {
+function parseEnrichmentResponse(raw: string, identification: BookIdentification): BookMetadata {
 	try {
 		const cleaned = raw
 			.trim()
