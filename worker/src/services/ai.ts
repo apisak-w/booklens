@@ -12,7 +12,7 @@ export async function identifyBook(ai: Ai, imageBase64: string): Promise<BookIde
 				content: [
 					{
 						type: 'text',
-						text: 'This is a book cover image. Extract the exact book title and author name as shown on the cover. Reply ONLY with valid JSON: {"title":"...","author":"...","language":"..."} where language is an ISO 639-1 code like "en", "th", "ja".'
+						text: 'This is a book cover. Reply ONLY with JSON: {"title":"...","author":"..."}'
 					},
 					{
 						type: 'image_url',
@@ -24,6 +24,8 @@ export async function identifyBook(ai: Ai, imageBase64: string): Promise<BookIde
 		max_tokens: MAX_TOKENS
 	})) as { response: string };
 
+	console.log(`[ai] raw response: ${aiResponse.response}`);
+	console.log(`[ai] image size: ${String(imageBase64.length)} chars`);
 	return parseAiResponse(aiResponse.response);
 }
 
@@ -36,11 +38,9 @@ function parseAiResponse(raw: string): BookIdentification {
 		const parsed: unknown = JSON.parse(cleaned);
 
 		if (isBookIdentification(parsed)) {
-			return {
-				title: parsed.title ?? 'Unknown',
-				author: parsed.author ?? 'Unknown',
-				language: parsed.language ?? DEFAULT_LANGUAGE
-			};
+			const title = parsed.title ?? 'Unknown';
+			const author = parsed.author ?? 'Unknown';
+			return { title, author, language: detectLanguage(title) };
 		}
 	} catch {
 		// Fall through to regex extraction
@@ -49,20 +49,25 @@ function parseAiResponse(raw: string): BookIdentification {
 	return extractWithRegex(raw);
 }
 
-function isBookIdentification(
-	value: unknown
-): value is { title?: string; author?: string; language?: string } {
+function isBookIdentification(value: unknown): value is { title?: string; author?: string } {
 	return typeof value === 'object' && value !== null;
 }
 
 function extractWithRegex(raw: string): BookIdentification {
 	const titleMatch = /"title"\s*:\s*"([^"]+)"/.exec(raw);
 	const authorMatch = /"author"\s*:\s*"([^"]+)"/.exec(raw);
-	const languageMatch = /"language"\s*:\s*"([^"]+)"/.exec(raw);
+	const title = titleMatch?.[1] ?? 'Unknown';
 
 	return {
-		title: titleMatch?.[1] ?? 'Unknown',
+		title,
 		author: authorMatch?.[1] ?? 'Unknown',
-		language: languageMatch?.[1] ?? DEFAULT_LANGUAGE
+		language: detectLanguage(title)
 	};
+}
+
+const THAI_RANGE = /[\u0E00-\u0E7F]/;
+
+function detectLanguage(text: string): string {
+	if (THAI_RANGE.test(text)) return 'th';
+	return DEFAULT_LANGUAGE;
 }
