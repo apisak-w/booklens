@@ -93,6 +93,8 @@ History was rewritten once to scrub leaked identifiers — avoid repeating this.
 
 Architecture and design decision documents are stored in `docs/superpowers/specs/`. Implementation plans are stored in `docs/superpowers/plans/`.
 
+- **Update documentation after each task is finished.** When a task completes, update the relevant spec or plan (mark steps done, note deviations, record decisions made during implementation). Documentation must reflect the current state of the project at all times.
+
 ## Git Workflow Rules
 
 - **Always `git pull` before starting work.** After force pushes, PR merges, or any remote changes, sync local main before creating branches or making changes. Skipping this leads to stale state, lost work, and unnecessary file recreation.
