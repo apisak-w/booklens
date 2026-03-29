@@ -12,7 +12,7 @@ export async function identifyBook(ai: Ai, imageBase64: string): Promise<BookIde
 				content: [
 					{
 						type: 'text',
-						text: 'This is a book cover image. Extract the exact book title and author name as shown on the cover. Reply ONLY with valid JSON: {"title":"...","author":"...","language":"..."} where language is an ISO 639-1 code like "en", "th", "ja".'
+						text: 'This is a book cover. Reply ONLY with JSON: {"title":"...","author":"...","language":"..."} where language is an ISO 639-1 code like "en", "th", "ja".'
 					},
 					{
 						type: 'image_url',
@@ -22,12 +22,23 @@ export async function identifyBook(ai: Ai, imageBase64: string): Promise<BookIde
 			}
 		],
 		max_tokens: MAX_TOKENS
-	})) as { response: string };
+	})) as { response: unknown };
 
-	return parseAiResponse(aiResponse.response);
+	const raw = aiResponse.response;
+	console.log(`[ai] raw response: ${JSON.stringify(raw)}`);
+	return parseAiResponse(raw);
 }
 
-function parseAiResponse(raw: string): BookIdentification {
+function parseAiResponse(raw: unknown): BookIdentification {
+	// Handle case where Workers AI returns a parsed object directly
+	if (typeof raw === 'object' && raw !== null && isBookIdentification(raw)) {
+		return buildIdentification(raw.title, raw.author, raw.language);
+	}
+
+	if (typeof raw !== 'string') {
+		return { title: 'Unknown', author: 'Unknown', language: DEFAULT_LANGUAGE };
+	}
+
 	try {
 		const cleaned = raw
 			.trim()
@@ -36,11 +47,7 @@ function parseAiResponse(raw: string): BookIdentification {
 		const parsed: unknown = JSON.parse(cleaned);
 
 		if (isBookIdentification(parsed)) {
-			return {
-				title: parsed.title ?? 'Unknown',
-				author: parsed.author ?? 'Unknown',
-				language: parsed.language ?? DEFAULT_LANGUAGE
-			};
+			return buildIdentification(parsed.title, parsed.author, parsed.language);
 		}
 	} catch {
 		// Fall through to regex extraction
@@ -55,14 +62,30 @@ function isBookIdentification(
 	return typeof value === 'object' && value !== null;
 }
 
+function buildIdentification(
+	title?: string,
+	author?: string,
+	language?: string
+): BookIdentification {
+	const t = title ?? 'Unknown';
+	return {
+		title: t,
+		author: author ?? 'Unknown',
+		language: language ?? detectLanguage(t)
+	};
+}
+
 function extractWithRegex(raw: string): BookIdentification {
 	const titleMatch = /"title"\s*:\s*"([^"]+)"/.exec(raw);
 	const authorMatch = /"author"\s*:\s*"([^"]+)"/.exec(raw);
 	const languageMatch = /"language"\s*:\s*"([^"]+)"/.exec(raw);
 
-	return {
-		title: titleMatch?.[1] ?? 'Unknown',
-		author: authorMatch?.[1] ?? 'Unknown',
-		language: languageMatch?.[1] ?? DEFAULT_LANGUAGE
-	};
+	return buildIdentification(titleMatch?.[1], authorMatch?.[1], languageMatch?.[1]);
+}
+
+const THAI_RANGE = /[\u0E00-\u0E7F]/;
+
+function detectLanguage(text: string): string {
+	if (THAI_RANGE.test(text)) return 'th';
+	return DEFAULT_LANGUAGE;
 }

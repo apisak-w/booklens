@@ -74,10 +74,14 @@ Examples:
 ## Key Details
 
 - Worker AI model: `@cf/meta/llama-3.2-11b-vision-instruct` (free tier, 10k neurons/day)
-- Worker is currently in **debug mode** — responses include a `debug` object. Remove before production.
 - Frontend uses SvelteKit (Svelte 5) with pnpm, built via Vite, output to `frontend/build/`.
-- Worker has no build step — single file (`worker.js`).
-- CORS is fully open (`*`) on the worker.
+- Worker is TypeScript, built and deployed via wrangler.
+
+## Workers AI Gotchas
+
+- **`AI.run()` response type is unstable.** Workers AI may return `response` as a string OR a parsed object depending on the model and runtime version. Always handle both: check `typeof response` before calling `JSON.parse`. Casting to `{ response: string }` will silently break when the API returns an object (you'll get `"[object Object]"` instead of the actual content).
+- **Keep vision prompts short.** The Llama 3.2 11B Vision model works best with concise prompts. The original working prompt is one sentence: `"This is a book cover. Reply ONLY with JSON: {...}"`. Verbose multi-paragraph prompts with rules and instructions degrade output quality.
+- **Test AI changes against the live model.** Unit tests with mocked AI responses won't catch API behavior changes. After modifying AI-related code, always test with `wrangler dev --remote` and a real image before merging.
 
 ## Sensitive Data Policy
 
@@ -101,6 +105,7 @@ Architecture and design decision documents are stored in `docs/superpowers/specs
 - **Every change request must use a separate worktree.** Create a new git worktree (in `.worktrees/`) for each change request to prevent conflicts between concurrent agent sessions. Never work directly on `main` — always branch via `git worktree add .worktrees/<branch-name> -b <branch-name>`. Clean up worktrees after merging.
 - **Never commit sensitive data "to fix later."** Get it right in the first commit. If a value might be sensitive, use a variable from the start. Cleaning up history after the fact (force push, filter-repo) is costly and error-prone.
 - **Verify file/directory paths before writing.** Run `ls` or `file` to confirm a path is what you expect (e.g. not a binary) before creating files there.
+- **Verify after merge.** After a PR is merged, run `git log main --oneline -3` to confirm all expected commits landed. Never push to an already-merged branch — create a new PR instead.
 
 ## Error Self-Investigation Policy
 
