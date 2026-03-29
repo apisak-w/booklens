@@ -28,4 +28,4 @@ enabled = true
 
 [[kv_namespaces]]
 binding = "BOOK_CACHE"
-id = "TBD_AFTER_CREATION"
+id = "3e035cc32887473091f4b270dcdd2d2c"
