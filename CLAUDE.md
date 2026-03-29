@@ -98,5 +98,15 @@ Architecture and design decision documents are stored in `docs/superpowers/specs
 ## Git Workflow Rules
 
 - **Always `git pull` before starting work.** After force pushes, PR merges, or any remote changes, sync local main before creating branches or making changes. Skipping this leads to stale state, lost work, and unnecessary file recreation.
+- **Every change request must use a separate worktree.** Create a new git worktree (in `.worktrees/`) for each change request to prevent conflicts between concurrent agent sessions. Never work directly on `main` — always branch via `git worktree add .worktrees/<branch-name> -b <branch-name>`. Clean up worktrees after merging.
 - **Never commit sensitive data "to fix later."** Get it right in the first commit. If a value might be sensitive, use a variable from the start. Cleaning up history after the fact (force push, filter-repo) is costly and error-prone.
 - **Verify file/directory paths before writing.** Run `ls` or `file` to confirm a path is what you expect (e.g. not a binary) before creating files there.
+
+## Error Self-Investigation Policy
+
+When a mistake is made during development (build failure, wrong file edited, merge conflict, test regression, etc.):
+
+1. **Stop and investigate.** Do not retry blindly. Identify the root cause of the error.
+2. **Document the incident.** Write a short post-mortem in `docs/incidents/` with: what happened, why it happened, and what prevented it from being caught earlier.
+3. **Add a preventive rule.** If the mistake reveals a gap in this file or project tooling, update CLAUDE.md or relevant configuration to prevent recurrence.
+4. **Never silently fix and move on.** The goal is to build institutional memory so the same class of mistake does not happen twice.
