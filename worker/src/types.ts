@@ -13,6 +13,8 @@ export interface BookIdentification {
 	author: string;
 }
 
+export type BookSource = 'google_books' | 'ai_vision';
+
 export interface BookMetadata {
 	title: string;
 	author: string;
@@ -23,6 +25,7 @@ export interface BookMetadata {
 	description: string | null;
 	infoLink: string | null;
 	thumbnail: string | null;
+	source: BookSource;
 }
 
 export interface GoogleBooksVolumeInfo {

@@ -1,3 +1,5 @@
+export type BookSource = 'google_books' | 'ai_vision';
+
 export interface BookResult {
 	title: string;
 	author: string;
@@ -8,6 +10,7 @@ export interface BookResult {
 	description: string | null;
 	infoLink: string | null;
 	thumbnail: string | null;
+	source: BookSource;
 }
 
 export interface ScanResponse extends BookResult {

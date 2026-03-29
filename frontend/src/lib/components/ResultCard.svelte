@@ -9,6 +9,7 @@
 
 	let { result, userImageUrl, onscanother }: Props = $props();
 
+	let isAiOnly = $derived(result.source === 'ai_vision');
 	let authorDisplay = $derived(result.author ? `by ${result.author}` : '');
 	let yearDisplay = $derived(result.publishedDate ? result.publishedDate.slice(0, 4) : '—');
 	let pagesDisplay = $derived(result.pageCount ? `${result.pageCount} pp.` : '—');
@@ -22,7 +23,11 @@
 <div class="result-card">
 	<div class="result-header">
 		<span class="result-label">Book identified</span>
-		<span class="confidence-badge">HIGH MATCH</span>
+		{#if isAiOnly}
+			<span class="confidence-badge ai-only">AI ONLY</span>
+		{:else}
+			<span class="confidence-badge">HIGH MATCH</span>
+		{/if}
 	</div>
 	<div class="result-body">
 		<!-- Mobile: cover + title row (hidden on desktop via +page.svelte responsive) -->
@@ -54,40 +59,46 @@
 
 		<hr class="divider-line" />
 
-		<div class="meta-grid">
-			<div class="meta-item">
-				<label>Publisher</label>
-				<div class="val">{result.publisher ?? '—'}</div>
+		{#if isAiOnly}
+			<div class="ai-only-notice">
+				<p>Title and author detected by AI vision. No matching book was found on Google Books, so additional metadata is unavailable.</p>
 			</div>
-			<div class="meta-item">
-				<label>Published</label>
-				<div class="val">{yearDisplay}</div>
+		{:else}
+			<div class="meta-grid">
+				<div class="meta-item">
+					<label>Publisher</label>
+					<div class="val">{result.publisher ?? '—'}</div>
+				</div>
+				<div class="meta-item">
+					<label>Published</label>
+					<div class="val">{yearDisplay}</div>
+				</div>
+				<div class="meta-item">
+					<label>Pages</label>
+					<div class="val">{pagesDisplay}</div>
+				</div>
+				<div class="meta-item">
+					<label>Category</label>
+					<div class="val">{result.categories ?? '—'}</div>
+				</div>
 			</div>
-			<div class="meta-item">
-				<label>Pages</label>
-				<div class="val">{pagesDisplay}</div>
-			</div>
-			<div class="meta-item">
-				<label>Category</label>
-				<div class="val">{result.categories ?? '—'}</div>
-			</div>
-		</div>
 
-		<div class="description-section">
-			<label>Description</label>
-			<div class="description-text">{descriptionDisplay}</div>
-		</div>
+			<div class="description-section">
+				<label>Description</label>
+				<div class="description-text">{descriptionDisplay}</div>
+			</div>
 
-		{#if result.infoLink}
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-			<a href={result.infoLink} target="_blank" rel="noopener noreferrer" class="google-books-link">
-				View on Google Books
-				<svg viewBox="0 0 24 24"
-					><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline
-						points="15 3 21 3 21 9"
-					/><line x1="10" y1="14" x2="21" y2="3" /></svg
-				>
-			</a>
+			{#if result.infoLink}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+				<a href={result.infoLink} target="_blank" rel="noopener noreferrer" class="google-books-link">
+					View on Google Books
+					<svg viewBox="0 0 24 24"
+						><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline
+							points="15 3 21 3 21 9"
+						/><line x1="10" y1="14" x2="21" y2="3" /></svg
+					>
+				</a>
+			{/if}
 		{/if}
 
 		<button class="btn-scan-another" onclick={onscanother}>Scan another book</button>
@@ -139,6 +150,11 @@
 		background: rgba(201, 168, 76, 0.2);
 		color: var(--gold);
 		letter-spacing: 0.05em;
+	}
+
+	.confidence-badge.ai-only {
+		background: rgba(180, 180, 180, 0.2);
+		color: rgba(245, 240, 232, 0.6);
 	}
 
 	.result-body {
@@ -214,6 +230,17 @@
 		border: none;
 		border-top: 1px solid var(--border);
 		margin: 1.25rem 0;
+	}
+
+	.ai-only-notice {
+		font-size: 0.85rem;
+		line-height: 1.6;
+		color: var(--muted);
+		font-style: italic;
+	}
+
+	.ai-only-notice p {
+		margin: 0;
 	}
 
 	.meta-grid {

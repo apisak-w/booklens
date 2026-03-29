@@ -134,5 +134,6 @@ describe('worker fetch handler', () => {
 		expect(json).toHaveProperty('author');
 		expect(json).toHaveProperty('publisher');
 		expect(json).toHaveProperty('thumbnail');
+		expect(json).toHaveProperty('source', 'google_books');
 	});
 });
