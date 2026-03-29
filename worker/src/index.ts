@@ -1,6 +1,8 @@
 import type { Env, ScanRequestBody, RateLimitEntry } from './types';
 import { identifyBook } from './services/ai';
 import { enrichBookMetadata } from './services/google-books';
+import { enrichWithAi } from './services/ai-enrich';
+import { getCachedMetadata, setCachedMetadata } from './services/cache';
 
 const RATE_LIMIT = 10;
 const RATE_WINDOW_MS = 60_000;
@@ -81,7 +83,41 @@ export default {
 			}
 
 			const identification = await identifyBook(env.AI, body.imageBase64);
-			const metadata = await enrichBookMetadata(identification, env.GOOGLE_BOOKS_API_KEY);
+			console.log(
+				`[scan] identified: "${identification.title}" by "${identification.author}" (${identification.language})`
+			);
+
+			// Check cache first
+			const cached = await getCachedMetadata(
+				env.BOOK_CACHE,
+				identification.title,
+				identification.author
+			);
+			if (cached) {
+				console.log(`[scan] cache hit: source=${cached.source}`);
+				return jsonResponse(cached as unknown as Record<string, unknown>, 200, cors);
+			}
+			console.log('[scan] cache miss');
+
+			// Try Google Books first, fall back to AI enrichment if no match
+			let metadata = await enrichBookMetadata(identification, env.GOOGLE_BOOKS_API_KEY);
+			console.log(`[scan] google books: source=${metadata.source}`);
+
+			if (metadata.source === 'ai_vision') {
+				metadata = await enrichWithAi(env.AI, identification);
+				console.log(`[scan] ai enrichment: source=${metadata.source}`);
+			}
+
+			// Cache successful enrichment (not ai_vision fallbacks)
+			if (metadata.source !== 'ai_vision') {
+				await setCachedMetadata(
+					env.BOOK_CACHE,
+					identification.title,
+					identification.author,
+					metadata
+				);
+				console.log('[scan] cached result');
+			}
 
 			return jsonResponse(metadata as unknown as Record<string, unknown>, 200, cors);
 		} catch {

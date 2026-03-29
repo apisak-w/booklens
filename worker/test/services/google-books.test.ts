@@ -2,7 +2,11 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { enrichBookMetadata } from '../../src/services/google-books';
 import type { BookIdentification, GoogleBooksResponse } from '../../src/types';
 
-const mockIdentification: BookIdentification = { title: 'Dune', author: 'Frank Herbert' };
+const mockIdentification: BookIdentification = {
+	title: 'Dune',
+	author: 'Frank Herbert',
+	language: 'en'
+};
 
 function mockFetchResponse(body: GoogleBooksResponse): void {
 	vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify(body))));

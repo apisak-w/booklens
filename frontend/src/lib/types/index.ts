@@ -1,4 +1,4 @@
-export type BookSource = 'google_books' | 'ai_vision';
+export type BookSource = 'google_books' | 'ai_vision' | 'ai_enriched';
 
 export interface BookResult {
 	title: string;

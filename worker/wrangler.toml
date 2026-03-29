@@ -25,3 +25,7 @@ enabled = true
 
 # For local development: wrangler dev
 # To deploy: wrangler deploy
+
+[[kv_namespaces]]
+binding = "BOOK_CACHE"
+id = "3e035cc32887473091f4b270dcdd2d2c"

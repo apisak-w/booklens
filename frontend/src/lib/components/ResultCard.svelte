@@ -10,6 +10,7 @@
 	let { result, userImageUrl, onscanother }: Props = $props();
 
 	let isAiOnly = $derived(result.source === 'ai_vision');
+	let isAiEnriched = $derived(result.source === 'ai_enriched');
 	let authorDisplay = $derived(result.author ? `by ${result.author}` : '');
 	let yearDisplay = $derived(result.publishedDate ? result.publishedDate.slice(0, 4) : '—');
 	let pagesDisplay = $derived(result.pageCount ? `${result.pageCount} pp.` : '—');
@@ -18,15 +19,28 @@
 			? result.description.slice(0, 280) + (result.description.length > 280 ? '…' : '')
 			: 'No description available.'
 	);
+
+	let badgeText = $derived(
+		result.source === 'google_books' ? 'HIGH MATCH'
+		: result.source === 'ai_enriched' ? 'AI ENRICHED'
+		: 'AI ONLY'
+	);
+
+	let linkText = $derived(
+		result.source === 'google_books' ? 'View on Google Books'
+		: ''
+	);
 </script>
 
 <div class="result-card">
 	<div class="result-header">
 		<span class="result-label">Book identified</span>
 		{#if isAiOnly}
-			<span class="confidence-badge ai-only">AI ONLY</span>
+			<span class="confidence-badge ai-only">{badgeText}</span>
+		{:else if isAiEnriched}
+			<span class="confidence-badge ai-enriched">{badgeText}</span>
 		{:else}
-			<span class="confidence-badge">HIGH MATCH</span>
+			<span class="confidence-badge">{badgeText}</span>
 		{/if}
 	</div>
 	<div class="result-body">
@@ -91,7 +105,7 @@
 			{#if result.infoLink}
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={result.infoLink} target="_blank" rel="noopener noreferrer" class="google-books-link">
-					View on Google Books
+					{linkText}
 					<svg viewBox="0 0 24 24"
 						><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline
 							points="15 3 21 3 21 9"
@@ -155,6 +169,11 @@
 	.confidence-badge.ai-only {
 		background: rgba(180, 180, 180, 0.2);
 		color: rgba(245, 240, 232, 0.6);
+	}
+
+	.confidence-badge.ai-enriched {
+		background: rgba(140, 180, 220, 0.2);
+		color: rgba(160, 200, 240, 0.8);
 	}
 
 	.result-body {

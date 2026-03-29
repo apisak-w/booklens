@@ -2,18 +2,20 @@ export interface Env {
 	AI: Ai;
 	GOOGLE_BOOKS_API_KEY?: string | undefined;
 	ALLOWED_ORIGIN: string;
+	BOOK_CACHE?: KVNamespace | undefined;
 }
 
 export interface ScanRequestBody {
 	imageBase64: string;
 }
 
+export type BookSource = 'google_books' | 'ai_vision' | 'ai_enriched';
+
 export interface BookIdentification {
 	title: string;
 	author: string;
+	language: string;
 }
-
-export type BookSource = 'google_books' | 'ai_vision';
 
 export interface BookMetadata {
 	title: string;
