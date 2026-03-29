@@ -1,4 +1,4 @@
-import type { Env, ScanRequestBody, RateLimitEntry } from './types';
+import type { Env, ScanRequestBody, RateLimitEntry, BookMetadata } from './types';
 import { identifyBook } from './services/ai';
 import { enrichBookMetadata } from './services/google-books';
 import { enrichWithAi } from './services/ai-enrich';
@@ -99,13 +99,34 @@ export default {
 			}
 			console.log('[scan] cache miss');
 
-			// Try Google Books first, fall back to AI enrichment if no match
-			let metadata = await enrichBookMetadata(identification, env.GOOGLE_BOOKS_API_KEY);
-			console.log(`[scan] google books: source=${metadata.source}`);
+			// Skip enrichment entirely if AI couldn't identify the book
+			const isUnidentified =
+				identification.title === 'Unknown' && identification.author === 'Unknown';
+			let metadata: BookMetadata;
 
-			if (metadata.source === 'ai_vision') {
-				metadata = await enrichWithAi(env.AI, identification);
-				console.log(`[scan] ai enrichment: source=${metadata.source}`);
+			if (isUnidentified) {
+				console.log('[scan] skipping enrichment: unidentified book');
+				metadata = {
+					title: 'Unknown',
+					author: 'Unknown',
+					publisher: null,
+					publishedDate: null,
+					pageCount: null,
+					categories: null,
+					description: null,
+					infoLink: null,
+					thumbnail: null,
+					source: 'ai_vision'
+				};
+			} else {
+				// Try Google Books first, fall back to AI enrichment if no match
+				metadata = await enrichBookMetadata(identification, env.GOOGLE_BOOKS_API_KEY);
+				console.log(`[scan] google books: source=${metadata.source}`);
+
+				if (metadata.source === 'ai_vision') {
+					metadata = await enrichWithAi(env.AI, identification);
+					console.log(`[scan] ai enrichment: source=${metadata.source}`);
+				}
 			}
 
 			// Cache successful enrichment (skip ai_vision fallbacks and unknown identifications)
