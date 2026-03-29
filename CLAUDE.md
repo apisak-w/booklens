@@ -74,10 +74,14 @@ Examples:
 ## Key Details
 
 - Worker AI model: `@cf/meta/llama-3.2-11b-vision-instruct` (free tier, 10k neurons/day)
-- Worker is currently in **debug mode** — responses include a `debug` object. Remove before production.
 - Frontend uses SvelteKit (Svelte 5) with pnpm, built via Vite, output to `frontend/build/`.
-- Worker has no build step — single file (`worker.js`).
-- CORS is fully open (`*`) on the worker.
+- Worker is TypeScript, built and deployed via wrangler.
+
+## Workers AI Gotchas
+
+- **`AI.run()` response type is unstable.** Workers AI may return `response` as a string OR a parsed object depending on the model and runtime version. Always handle both: check `typeof response` before calling `JSON.parse`. Casting to `{ response: string }` will silently break when the API returns an object (you'll get `"[object Object]"` instead of the actual content).
+- **Keep vision prompts short.** The Llama 3.2 11B Vision model works best with concise prompts. The original working prompt is one sentence: `"This is a book cover. Reply ONLY with JSON: {...}"`. Verbose multi-paragraph prompts with rules and instructions degrade output quality.
+- **Test AI changes against the live model.** Unit tests with mocked AI responses won't catch API behavior changes. After modifying AI-related code, always test with `wrangler dev --remote` and a real image before merging.
 
 ## Sensitive Data Policy
 
